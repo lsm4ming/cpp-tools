@@ -70,8 +70,6 @@ namespace cpptools::time
 
         [[nodiscard]] bool after(const Time &time) const;
 
-        [[nodiscard]] int week() const;
-
         [[nodiscard]] int weekOfYear() const;
 
         [[nodiscard]] String dayOfWeek() const;

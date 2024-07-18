@@ -23,6 +23,7 @@ int main()
     now.addDate(0, 0, 1);
     std::cout << now.format("%Y-%m-%d %H:%M:%S") << std::endl;
 
-    std::cout << now.week() << std::endl;
+    std::cout << now.dayOfWeek() << std::endl;
+    std::cout << now.weekOfYear() << std::endl;
     return 0;
 }

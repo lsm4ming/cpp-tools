@@ -73,40 +73,6 @@ namespace cpptools::time
         return this->_time > time._time;
     }
 
-    int Time::week() const
-    {
-        std::time_t t = std::chrono::system_clock::to_time_t(this->_time);
-        std::tm tm{};
-        gmtime_r(&t, &tm);
-
-        int dayOfYear = tm.tm_yday + 1;
-
-        int weekNumber = (dayOfYear - (tm.tm_wday + 6) % 7 + 10) / 7;
-
-        if (weekNumber == 0) // 处理第0周
-        {
-            std::tm prevYearTm = tm;
-            prevYearTm.tm_year -= 1;
-            std::time_t prevYearTimeT = std::mktime(&prevYearTm);
-            std::tm *prevYearPtr = std::gmtime(&prevYearTimeT);
-            int prevYearDayOfYear = prevYearPtr->tm_yday + 1;
-            weekNumber = (prevYearDayOfYear - (prevYearPtr->tm_wday + 6) % 7 + 10) / 7;
-        } else if (weekNumber == 53) // 处理最后一周
-        {
-            std::tm nextYearTm = tm;
-            nextYearTm.tm_year += 1;
-            std::time_t nextYearTimeT = std::mktime(&nextYearTm);
-            std::tm *nextYearPtr = std::gmtime(&nextYearTimeT);
-            int nextYearDayOfYear = nextYearPtr->tm_yday + 1;
-            if ((nextYearDayOfYear - (nextYearPtr->tm_wday + 6) % 7 + 10) / 7 != 1)
-            {
-                weekNumber = 1;
-            }
-        }
-
-        return weekNumber;
-    }
-
     int Time::weekOfYear() const
     {
         std::time_t t = std::chrono::system_clock::to_time_t(this->_time);
