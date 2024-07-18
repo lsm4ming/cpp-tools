@@ -106,4 +106,27 @@ namespace cpptools::time
 
         return weekNumber;
     }
+
+    int Time::weekOfYear() const
+    {
+        std::time_t t = std::chrono::system_clock::to_time_t(this->_time);
+        std::tm tm{};
+        localtime_r(&t, &tm);
+
+        char buffer[3];
+        strftime(buffer, 3, "%W", &tm);
+        return std::stoi(buffer);
+    }
+
+    String Time::dayOfWeek() const
+    {
+        std::time_t t = std::chrono::system_clock::to_time_t(this->_time);
+        std::tm tm{};
+        localtime_r(&t, &tm);
+
+        char buffer[10];
+        strftime(buffer, sizeof(buffer), "%A", &tm);
+
+        return buffer;
+    }
 }
