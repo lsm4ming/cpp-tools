@@ -29,7 +29,7 @@ namespace cpptools::io
         std::ofstream _file;
 
     public:
-        explicit FileWriter(const String &filename) : _file(filename){};
+        explicit FileWriter(const String &filename, std::ios_base::openmode mode = std::ios_base::out) : _file(filename, mode){};
 
         explicit FileWriter(const File &file) : _file(file.getAbsolutePath()){};
 
