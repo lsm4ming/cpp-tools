@@ -1,15 +1,19 @@
 #include <iostream>
-#include "file/file.h"
+#include "io/file.h"
 #include "time/time.h"
+#include "io/reader.h"
 
 int main()
 {
-    cpptools::file::File f("/home/lsm/cpp-tools/hello.txt");
+    cpptools::io::File f("Makefile");
 
     // f.mkdirs();
     std::cout << f.exists() << std::endl;
     std::cout << f.lastModified() << std::endl;
     std::cout << f.length() << std::endl;
+    std::cout << f.getName() << std::endl;
+    std::cout << f.getParent() << std::endl;
+    std::cout << f.getAbsolutePath() << std::endl;
 
     cpptools::time::setTimeZone(cpptools::time::UTCPlus8);
 
@@ -25,5 +29,12 @@ int main()
 
     std::cout << now.dayOfWeek() << std::endl;
     std::cout << now.weekOfYear() << std::endl;
+
+    // 读取文件
+    auto reader = cpptools::io::FileReader(f);
+    while (!reader.eof())
+    {
+        std::cout << reader.readLine() << std::endl;
+    }
     return 0;
 }

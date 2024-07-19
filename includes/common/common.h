@@ -7,6 +7,14 @@
 
 namespace cpptools::common
 {
+#ifdef defined(WIN32)
+#define OS_WINDOWS
+#elif defined(__linux__)
+#define OS_LINUX
+#elif defined(__APPLE__)
+#define OS_MAC
+#endif
+
     using uint32 = unsigned int;
     using uint64 = unsigned long;
     using int64 = long long;

@@ -7,6 +7,10 @@ using namespace cpptools::common;
 
 namespace cpptools::time
 {
+#ifdef OS_LINUX
+#undef unix // 取消宏定义
+#endif
+
     enum TimeZone
     {
         UTCMinus12 = -12,
@@ -43,11 +47,11 @@ namespace cpptools::time
     {
     private:
         TimePoint _time;
+
     public:
         Time() = default;
 
-        explicit Time(TimePoint time) : _time(time)
-        {};
+        explicit Time(TimePoint time) : _time(time){};
 
         ~Time() = default;
 
