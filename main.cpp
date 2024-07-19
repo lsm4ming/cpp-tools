@@ -2,6 +2,7 @@
 #include "io/file.h"
 #include "time/time.h"
 #include "io/reader.h"
+#include "io/writer.h"
 
 int main()
 {
@@ -36,5 +37,8 @@ int main()
     {
         std::cout << reader.readLine() << std::endl;
     }
+
+    auto wirter = cpptools::io::FileWriter("/home/lsm/cpp-tools/hello.txt");
+    wirter.write("hello world", 11);
     return 0;
 }

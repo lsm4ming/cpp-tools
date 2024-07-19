@@ -1,22 +1,10 @@
 #pragma once
 
-#include "file.h"
 #include <fstream>
+#include "file.h"
 
 namespace cpptools::io
 {
-    /**
-     * io stream
-     */
-    class IoStream
-    {
-    public:
-        /**
-         * 关闭
-         */
-        virtual void close() = 0;
-    };
-
     class InputStream : public IoStream
     {
     public:

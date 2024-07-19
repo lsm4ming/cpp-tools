@@ -11,22 +11,17 @@ using namespace cpptools::common;
 namespace cpptools::io
 {
     /**
-     * output streams
+     * io stream
      */
-    class Writer
+    class IoStream
     {
     public:
-        virtual ~Writer() = 0;
-
         /**
-         * write data
-         * @param data 数据
-         * @param length 数据长度
-         * @return 写入长度
+         * 关闭
          */
-        virtual int write(const char *data, uint32 length) = 0;
+        virtual void close() = 0;
     };
-
+  
     class File
     {
     private:
