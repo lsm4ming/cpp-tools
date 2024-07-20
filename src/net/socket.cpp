@@ -47,6 +47,7 @@ int cpptools::net::Socket::connect(const String &host, uint16 port)
     addr.sin_addr.s_addr = inet_addr(host.c_str());
     if (::connect(this->_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
     {
+        ::close(this->_fd);
         return -1;
     }
     this->_connected = true;

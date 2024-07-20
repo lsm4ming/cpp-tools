@@ -4,6 +4,7 @@
 #include "io/reader.h"
 #include "io/writer.h"
 #include "net/socket.h"
+#include "net/datagram.h"
 
 void ioTest()
 {
@@ -55,6 +56,11 @@ void netTest()
 {
     auto socket = new cpptools::net::Socket();
     socket->connect("157.148.69.74", 80);
+
+    auto udpSocket = new cpptools::net::DatagramSocket();
+    udpSocket->bind("127.0.0.1", 9900);
+    char buf[16] = "hello";
+    std::cout << "udpSocket sendTo result:" << udpSocket->sendTo(buf, sizeof(buf)) << std::endl;
 }
 
 int main()
