@@ -12,3 +12,5 @@ file(GLOB_RECURSE CPP_SOURCES src/*.cpp)
 message(STATUS "RECURSE FILE IS:" ${CPP_SOURCES})
 
 add_executable(cpp-tools main.cpp ${CPP_SOURCES})
+
+# add_library(cpp_tools STATIC ${CPP_SOURCES})
