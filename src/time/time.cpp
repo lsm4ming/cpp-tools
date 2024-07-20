@@ -2,13 +2,6 @@
 
 namespace cpptools::time
 {
-    TimeZone defaultTimeZone = UTC;
-
-    void setTimeZone(TimeZone timeZone)
-    {
-        defaultTimeZone = timeZone;
-    }
-
     Time Time::now()
     {
         return Time(std::chrono::system_clock::now());
@@ -94,5 +87,10 @@ namespace cpptools::time
         strftime(buffer, sizeof(buffer), "%A", &tm);
 
         return buffer;
+    }
+
+    Time Time::add(Duration duration) const
+    {
+        return Time(this->_time + std::chrono::microseconds(duration));
     }
 }

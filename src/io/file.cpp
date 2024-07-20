@@ -117,7 +117,6 @@ namespace cpptools::io
 
     String File::getAbsolutePath() const
     {
-        // 获取绝对路径
         return std::filesystem::absolute(this->_pathname).string();
     }
 }
