@@ -44,7 +44,7 @@ namespace cpptools::time
         UTCPlus11 = 11,
     };
 
-    extern TimeZone defaultTimeZone;
+    extern TimeZone *defaultTimeZone;
 
     extern void setTimeZone(TimeZone timeZone);
 

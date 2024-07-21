@@ -26,12 +26,14 @@ void ioTest()
     }
 
     // 写文件
-    auto wirter = cpptools::io::FileWriter("/home/lsm/cpp-tools/hello.txt");
-    wirter.write("hello world", 11);
+    auto writer = cpptools::io::FileWriter("/home/lsm/cpp-tools/hello.txt");
+    writer.write("hello world", 11);
 }
 
 void timeTest()
 {
+    std::cout << "本地时区" << cpptools::time::getLocalTimeZone() << std::endl;
+
     cpptools::time::setTimeZone(cpptools::time::UTCPlus8);
 
     auto now = cpptools::time::Time::now();

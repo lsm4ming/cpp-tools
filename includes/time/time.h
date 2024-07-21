@@ -25,7 +25,7 @@ namespace cpptools::time
         static Time now();
 
         static Time date(int year, int month, int day, int hour = 0,
-                         int minute = 0, int second = 0, TimeZone zone = defaultTimeZone);
+                         int minute = 0, int second = 0, TimeZone zone = getLocalTimeZone());
 
         void addDate(int year, int month, int day, int hour = 0, int minute = 0, int second = 0);
 
@@ -35,7 +35,7 @@ namespace cpptools::time
 
         [[nodiscard]] int64 unixNanosecond() const;
 
-        [[nodiscard]] String format(const String &format, TimeZone zone = defaultTimeZone) const;
+        [[nodiscard]] String format(const String &format, TimeZone zone = getLocalTimeZone()) const;
 
         [[nodiscard]] bool before(const Time &time) const;
 

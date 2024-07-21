@@ -41,7 +41,7 @@ int cpptools::net::Socket::connect(const String &host, uint16 port)
     {
         return -1;
     }
-    struct sockaddr_in addr;
+    struct sockaddr_in addr{};
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
     addr.sin_addr.s_addr = inet_addr(host.c_str());
@@ -54,7 +54,7 @@ int cpptools::net::Socket::connect(const String &host, uint16 port)
     return this->_fd;
 }
 
-int cpptools::net::Socket::setBlocking(bool blocking)
+int cpptools::net::Socket::setBlocking(bool blocking) const
 {
     int flags = fcntl(this->_fd, F_GETFL, 0);
     if (blocking)
@@ -63,6 +63,7 @@ int cpptools::net::Socket::setBlocking(bool blocking)
     }
     return fcntl(this->_fd, F_SETFL, flags | O_NONBLOCK);
 }
+
 int cpptools::net::Socket::send(char *data, uint32 length)
 {
     if (this->_connected)
@@ -72,7 +73,7 @@ int cpptools::net::Socket::send(char *data, uint32 length)
     return -1;
 }
 
-int cpptools::net::Socket::receive(char *data, uint32 length)
+int cpptools::net::Socket::receive(char *data, uint32 length) const
 {
     if (this->_connected)
     {

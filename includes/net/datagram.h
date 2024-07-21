@@ -1,6 +1,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+
+#include <utility>
 #include "common/common.h"
 
 using namespace cpptools::common;
@@ -10,17 +12,17 @@ namespace cpptools::net
     class DatagramPacket
     {
     private:
-        mutable char *_data;
-        mutable uint _length;
+        mutable char *_data{};
+        mutable uint _length{};
         String _host;
-        uint16 _port;
+        uint16 _port{};
 
     public:
         DatagramPacket() = default;
 
-        DatagramPacket(char *data, uint length) : _data(data), _length(length){};
+        explicit DatagramPacket(char *data, uint length) : _data(data), _length(length){};
 
-        DatagramPacket(char *data, uint length, const String &host, uint16 port) : _data(data), _length(length), _host(host), _port(port){};
+        DatagramPacket(char *data, uint length, String host, uint16 port) : _data(data), _length(length), _host(std::move(host)), _port(port){};
 
         void setHost(const String &host);
 
@@ -41,7 +43,7 @@ namespace cpptools::net
     {
     private:
         String _host;
-        uint16 _port;
+        uint16 _port{};
         int _fd{-1};
         bool _connected{false};
 
@@ -62,6 +64,6 @@ namespace cpptools::net
 
         int receive(DatagramPacket packet);
 
-        void close();
+        void close() const;
     };
 }

@@ -5,6 +5,8 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
+
+#include <utility>
 #include "common/common.h"
 
 using namespace cpptools::common;
@@ -22,21 +24,21 @@ namespace cpptools::net
     public:
         Socket() = default;
         ~Socket();
-        Socket(const String &host, uint16 port) : _host(host), _port(port){};
+        Socket(String host, uint16 port) : _host(std::move(host)), _port(port){};
         Socket(const Socket &other) = delete;
         Socket(Socket &&other) = delete;
         Socket &operator=(Socket &&other) = delete;
 
         void setHost(const String &host);
-        String getHost() const;
+        [[nodiscard]] String getHost() const;
         void setPort(uint16 port);
-        uint16 getPort() const;
+        [[nodiscard]] uint16 getPort() const;
 
         int connect();
         int connect(const String &host, uint16 port);
-        int setBlocking(bool blocking);
+        [[nodiscard]] int setBlocking(bool blocking) const;
         int send(char* data, uint32 length);
-        int receive(char* data, uint32 length);
+        int receive(char* data, uint32 length) const;
         void close();
     };
 }

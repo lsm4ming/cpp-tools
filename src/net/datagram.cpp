@@ -1,5 +1,7 @@
 #include "net/datagram.h"
 
+#include <utility>
+
 void cpptools::net::DatagramPacket::setHost(const String &host)
 {
     this->_host = host;
@@ -38,7 +40,7 @@ uint cpptools::net::DatagramPacket::getLength() const
 
 cpptools::net::DatagramSocket::DatagramSocket(String host, uint16 port)
 {
-    this->_host = host;
+    this->_host = std::move(host);
     this->_port = port;
 }
 
@@ -60,7 +62,7 @@ int cpptools::net::DatagramSocket::bind(const String &host, uint16 port)
     }
     this->_host = this->_host.empty() ? host : this->_host;
     this->_port = this->_port == 0 ? port : this->_port;
-    struct sockaddr_in serverAddr;
+    struct sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(port);
     serverAddr.sin_addr.s_addr = inet_addr(host.c_str());
@@ -84,7 +86,7 @@ int cpptools::net::DatagramSocket::sendTo(const DatagramPacket &packet)
     {
         return -1;
     }
-    struct sockaddr_in serverAddr;
+    struct sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(packet.getPort());
     serverAddr.sin_addr.s_addr = inet_addr(packet.getHost().c_str());
@@ -101,7 +103,7 @@ int cpptools::net::DatagramSocket::receive(DatagramPacket packet)
     {
         return -1;
     }
-    struct sockaddr_in clientAddr;
+    struct sockaddr_in clientAddr{};
     socklen_t addrLen = sizeof(clientAddr);
     if (recvfrom(this->_fd, packet.getData(), packet.getLength(), 0, (struct sockaddr *)&clientAddr, &addrLen) < 0)
     {
@@ -112,7 +114,7 @@ int cpptools::net::DatagramSocket::receive(DatagramPacket packet)
     return 0;
 }
 
-void cpptools::net::DatagramSocket::close()
+void cpptools::net::DatagramSocket::close() const
 {
     ::close(this->_fd);
 }
