@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <chrono>
 
 namespace cpptools::common
 {
@@ -18,6 +17,7 @@ namespace cpptools::common
     using uint32 = unsigned int;
     using uint64 = unsigned long;
     using int64 = long long;
+    using uint16 = unsigned short;
 
     using String = std::string;
 
@@ -32,6 +32,4 @@ namespace cpptools::common
     using StringMap = std::unordered_map<String, String>;
 
     using StringMapList = std::vector<StringMap>;
-
-    using TimePoint = std::chrono::system_clock::time_point;
 }
