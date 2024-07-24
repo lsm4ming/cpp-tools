@@ -5,6 +5,7 @@
 #include "io/writer.h"
 #include "net/socket.h"
 #include "net/datagram.h"
+#include "json/jsonparse.h"
 
 void ioTest()
 {
@@ -65,10 +66,18 @@ void netTest()
     std::cout << "udpSocket sendTo result:" << udpSocket->sendTo(buf, sizeof(buf)) << std::endl;
 }
 
+void jsonTest()
+{
+    auto json = cpptools::json::JsonParse::parse("{\"a\": 1, \"b\": 2}");
+    // std::cout << json["a"] << std::endl;
+    // std::cout << json["b"] << std::endl;
+}
+
 int main()
 {
     // ioTest();
     timeTest();
     netTest();
+    jsonTest();
     return 0;
 }

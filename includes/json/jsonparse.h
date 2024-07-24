@@ -7,21 +7,9 @@ using namespace cpptools::common;
 
 namespace cpptools::json
 {
-    enum JsonToken
-    {
-        Null,
-        Bool,
-        String,
-        Int,
-        Double,
-        Array,
-        Object
-    };
-
     class JsonParse
     {
     public:
-        static JsonValue parse(const ::String& str);
+        static JsonValue parse(const String &str);
     };
 }
-

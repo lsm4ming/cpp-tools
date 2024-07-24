@@ -6,43 +6,68 @@ using namespace cpptools::common;
 
 namespace cpptools::json
 {
+    enum JsonToken
+    {
+        NullValue,
+        BoolValue,
+        StringValue,
+        IntValue,
+        DoubleValue,
+        ArrayValue,
+        ObjectValue
+    };
+
+    class JsonValue;
+
+    class JsonObject
+    {
+    private:
+        SortMap<String, JsonValue> value{};
+
+    public:
+        JsonObject() = default;
+
+    public:
+        JsonValue operator[](const String &key) const;
+    };
+
+    class JsonArray
+    {
+    private:
+        VectorList<JsonValue> value{};
+
+    public:
+        JsonArray() = default;
+
+    public:
+        JsonValue operator[](int index) const;
+    };
+
     class JsonValue
     {
-    };
-
-    class JsonObject : public JsonValue
-    {
     private:
-        SortMap <String, JsonValue> value;
-    };
+        union json_value
+        {
+            int int_value;
+            double double_value;
+            bool bool_value;
+            String string_value;
+            JsonObject object_value;
+            JsonArray array_value;
+        };
 
-    class JsonArray : public JsonValue
-    {
-    private:
-        VectorList <JsonValue> value;
-    };
+        JsonToken json_type;
 
-    class JsonString : public JsonValue
-    {
-    private:
-        String value;
-    };
+    public:
+        JsonValue() = default;
 
-    class JsonBool : public JsonValue
-    {
-    private:
-        bool value;
-    };
+    public:
+        virtual ~JsonValue() = default;
 
-    class JsonInt : public JsonValue
-    {
-    private:
-        int value;
-    };
+        JsonValue operator[](int index) const;
 
-    class JsonDouble : public JsonValue
-    {
-    private:
-        double value;
+        JsonValue operator[](const String &key) const;
+
+        JsonToken getType() const;
     };
 }
