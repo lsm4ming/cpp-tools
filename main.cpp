@@ -68,9 +68,9 @@ void netTest()
 
 void jsonTest()
 {
-    auto json = cpptools::json::JsonParse::parse("{\"a\": 1, \"b\": 2}");
-    // std::cout << json["a"] << std::endl;
-    // std::cout << json["b"] << std::endl;
+    auto jsonValue = cpptools::json::JsonParse::parse(R"({"a": 1, "b": 2})");
+//    std::cout << json["a"] << std::endl;
+//    std::cout << json["b"] << std::endl;
 }
 
 int main()

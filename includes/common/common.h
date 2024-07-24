@@ -30,6 +30,9 @@ namespace cpptools::common
     template<typename T>
     using VectorList = std::vector<Vector<T>>;
 
+    template<typename T>
+    using List =  std::vector<T>;
+
     using StringMap = std::unordered_map<String, String>;
 
     template<typename K, typename V>
