@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <map>
 
 namespace cpptools::common
 {
@@ -23,13 +24,19 @@ namespace cpptools::common
 
     using StringList = std::vector<String>;
 
-    template <typename T>
+    template<typename T>
     using Vector = std::vector<T>;
 
-    template <typename T>
+    template<typename T>
     using VectorList = std::vector<Vector<T>>;
 
     using StringMap = std::unordered_map<String, String>;
+
+    template<typename K, typename V>
+    using HashMap = std::unordered_map<K, V>;
+
+    template<typename K, typename V>
+    using SortMap = std::map<K, V>;
 
     using StringMapList = std::vector<StringMap>;
 }
