@@ -84,8 +84,6 @@ namespace cpptools::json
 
         JsonValue &operator[](const String &key);
 
-        // JsonValue &operator[](const String &key);
-
         JsonValue &operator=(const String &str);
 
         [[nodiscard]] JsonToken getType() const;
