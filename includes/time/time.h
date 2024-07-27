@@ -7,9 +7,6 @@ using namespace cpptools::common;
 
 namespace cpptools::time
 {
-#ifdef OS_LINUX
-#undef unix // 取消宏定义
-#endif
     class Time
     {
     private:
@@ -29,7 +26,7 @@ namespace cpptools::time
 
         void addDate(int year, int month, int day, int hour = 0, int minute = 0, int second = 0);
 
-        [[nodiscard]] int64 unix() const;
+        [[nodiscard]] int64 unixSecond() const;
 
         [[nodiscard]] int64 unixMillisecond() const;
 

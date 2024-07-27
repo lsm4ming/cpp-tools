@@ -20,7 +20,7 @@ namespace cpptools::time
         return Time(std::chrono::system_clock::from_time_t(t));
     }
 
-    int64 Time::unix() const
+    int64 Time::unixSecond() const
     {
         return std::chrono::duration_cast<std::chrono::seconds>(_time.time_since_epoch()).count();
     }

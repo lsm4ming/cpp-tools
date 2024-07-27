@@ -39,7 +39,7 @@ void timeTest()
 
     auto now = cpptools::time::Time::now();
     // 当前时间戳
-    std::cout << now.unix() << std::endl;
+    std::cout << now.unixSecond() << std::endl;
 
     // 格式化输出
     std::cout << now.format("%Y-%m-%d %H:%M:%S") << std::endl;
