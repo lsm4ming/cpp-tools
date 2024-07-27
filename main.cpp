@@ -74,8 +74,8 @@ void jsonTest()
 
     auto name = jsonValue["name"];
     std::cout << name.getType() << std::endl;
-    // auto jsonValue = cpptools::json::JsonParse::parse(R"(  {"a": 1, "b": 2})");
-    // std::cout << jsonValue.getType() << std::endl;
+    auto pValue = cpptools::json::JsonParse::parse(R"(  {"a": 1, "b": 2})");
+    std::cout << pValue.getType() << std::endl;
 }
 
 int main()

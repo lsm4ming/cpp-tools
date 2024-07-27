@@ -26,7 +26,7 @@ JsonValue &JsonValue::operator[](const String &key)
 {
     if (json_type != JsonToken::ObjectValue)
     {
-        throw std::runtime_error("json_type is not object");
+        json_type = JsonToken::ObjectValue;
     }
     if (!std::holds_alternative<SharedPtr<JsonObject>>(value))
     {
