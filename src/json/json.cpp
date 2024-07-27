@@ -1,15 +1,17 @@
 #include "json/json.h"
 
+#include <memory>
+
 using namespace cpptools::json;
 
-JsonValue JsonValue::operator[](int index) const
+JsonValue JsonValue::operator[](int index)
 {
     if (this->json_type != JsonToken::ArrayValue)
     {
         return JsonValue();
     }
-    auto &array = std::get<JsonArray>(value);
-    return array[index];
+    const auto &array = std::get<SharedPtr<JsonArray>>(value);
+    return array.get()[index];
 }
 
 JsonValue JsonValue::nullValue()
@@ -22,26 +24,32 @@ JsonValue JsonValue::objectValue()
     return JsonValue(JsonToken::ObjectValue, nullptr);
 }
 
-JsonValue JsonValue::operator[](const String &key) const
-{
-    if (this->json_type != JsonToken::ObjectValue)
-    {
-        return JsonValue();
-    }
-    const auto &obj = std::get<JsonObject>(value);
-    return obj[key];
-}
+//JsonValue &JsonValue::operator[](const String &key)
+//{
+//    if (this->json_type != JsonToken::ObjectValue)
+//    {
+//        throw std::runtime_error("json_type is not object");
+//    } else if (!std::holds_alternative<SharedPtr<JsonObject>>(value))
+//    {
+//        value = std::make_shared<JsonObject>();
+//    }
+//    const auto obj = std::get<SharedPtr<JsonObject>>(value);
+//    auto result = obj->emplace(key, JsonValue());
+//    return obj->operator[](key);
+//}
 
 JsonValue &JsonValue::operator[](const String &key)
 {
     if (json_type != JsonToken::ObjectValue)
     {
-        throw std::runtime_error("JsonValue is not an object.");
+        throw std::runtime_error("json_type is not object");
     }
-    auto &obj = std::get<JsonObject>(value);
-    // 如果键不存在，则插入一个默认构造的 JsonValue
-    auto [iter, inserted] = obj.emplace(key, JsonValue());
-    return iter; // 返回对应键的引用
+    if (!std::holds_alternative<SharedPtr<JsonObject>>(value))
+    {
+        value = std::make_shared<JsonObject>();
+    }
+    auto obj = std::get<SharedPtr<JsonObject>>(value);
+    return obj->emplace(key, JsonValue());
 }
 
 JsonValue &JsonValue::operator=(const String &str)
@@ -76,33 +84,27 @@ JsonToken JsonValue::getType() const
     return this->json_type;
 }
 
-JsonValue::~JsonValue()
-{
-}
-
-JsonValue JsonObject::operator[](const String &key) const
-{
-    return this->value.at(key);
-}
+JsonValue::~JsonValue() = default;
 
 void JsonObject::insert(const String &key, const JsonValue &val)
 {
     this->value[key] = val;
 }
 
-std::pair<String, JsonValue> JsonObject::emplace(const String &key, const JsonValue &val)
+JsonValue JsonObject::get(const String &key)
 {
-    return this->value.emplace(key, val);
+    return this->value[key];
 }
 
-JsonValue JsonArray::operator[](int index) const
+JsonValue &JsonObject::emplace(const String &key, const JsonValue &val)
 {
-    return this->value[index];
+    auto [iter, ok] = this->value.emplace(key, val);
+    return iter->second;
 }
 
 int JsonArray::size() const
 {
-    return this->value.size();
+    return static_cast<int>(value.size());
 }
 
 void JsonArray::push_back(const JsonValue &val)

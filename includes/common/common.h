@@ -42,4 +42,7 @@ namespace cpptools::common
     using SortMap = std::map<K, V>;
 
     using StringMapList = std::vector<StringMap>;
+
+    template<typename T>
+    using SharedPtr = std::shared_ptr<T>;
 }

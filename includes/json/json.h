@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <type_traits>
+#include <utility>
 #include <variant>
 #include "common/common.h"
 
@@ -26,7 +27,8 @@ namespace cpptools::json
 
     class JsonArray;
 
-    using JsonVariant = std::variant<std::nullptr_t, bool, int, double, String, JsonObject, JsonArray>;
+    using JsonVariant = std::variant<std::nullptr_t, bool, int, double, String,
+            SharedPtr < JsonObject>, SharedPtr <JsonArray>>;
 
     class JsonValue
     {
@@ -34,26 +36,36 @@ namespace cpptools::json
         JsonVariant value;
         JsonToken json_type;
 
-        JsonValue(JsonToken type, JsonVariant value) : json_type(type), value(value) {};
+        explicit JsonValue(JsonToken type, JsonVariant value) : json_type(type), value(std::move(value))
+        {};
 
     public:
-        explicit JsonValue() : JsonValue(JsonToken::NullValue, nullptr) {};
+        explicit JsonValue() : JsonValue(JsonToken::NullValue, nullptr)
+        {};
 
-        explicit JsonValue(bool val) : JsonValue(JsonToken::BoolValue, val) {};
+        explicit JsonValue(bool val) : JsonValue(JsonToken::BoolValue, val)
+        {};
 
-        explicit JsonValue(int val) : JsonValue(JsonToken::IntValue, val) {};
+        explicit JsonValue(int val) : JsonValue(JsonToken::IntValue, val)
+        {};
 
-        explicit JsonValue(double val) : JsonValue(JsonToken::DoubleValue, val) {};
+        explicit JsonValue(double val) : JsonValue(JsonToken::DoubleValue, val)
+        {};
 
-        explicit JsonValue(const String &val) : JsonValue(JsonToken::StringValue, val) {};
+        explicit JsonValue(const String &val) : JsonValue(JsonToken::StringValue, val)
+        {};
 
-        explicit JsonValue(const JsonObject &val) : JsonValue(JsonToken::ObjectValue, val) {};
+        explicit JsonValue(const SharedPtr <JsonObject> &val) : JsonValue(JsonToken::ObjectValue, val)
+        {};
 
-        explicit JsonValue(const JsonArray &val) : JsonValue(JsonToken::ArrayValue, val) {};
+        explicit JsonValue(const SharedPtr <JsonArray> &val) : JsonValue(JsonToken::ArrayValue, val)
+        {};
 
-        JsonValue(const JsonValue &other) : json_type(other.json_type), value(other.value) {};
+        JsonValue(const JsonValue &other) : json_type(other.json_type), value(other.value)
+        {};
 
-        JsonValue(JsonValue &&other) noexcept : json_type(other.json_type), value(std::move(other.value)) {};
+        JsonValue(JsonValue &&other) noexcept: json_type(other.json_type), value(std::move(other.value))
+        {};
 
         JsonValue &operator=(const JsonValue &other);
 
@@ -68,11 +80,11 @@ namespace cpptools::json
 
         static JsonValue objectValue();
 
-        JsonValue operator[](int index) const;
-
-        JsonValue operator[](const String &key) const;
+        JsonValue operator[](int index);
 
         JsonValue &operator[](const String &key);
+
+        // JsonValue &operator[](const String &key);
 
         JsonValue &operator=(const String &str);
 
@@ -82,30 +94,28 @@ namespace cpptools::json
     class JsonObject : public JsonValue
     {
     private:
-        SortMap<String, JsonValue> value{};
+        SortMap <String, JsonValue> value{};
 
     public:
         JsonObject() = default;
 
     public:
-        JsonValue operator[](const String &key) const;
-
         void insert(const String &key, const JsonValue &val);
 
-        std::pair<String, JsonValue> emplace(const String &key, const JsonValue &val);
+        JsonValue get(const String &key);
+
+        JsonValue& emplace(const String &key, const JsonValue &val);
     };
 
     class JsonArray : public JsonValue
     {
     private:
-        List<JsonValue> value{};
+        List <JsonValue> value{};
 
     public:
         JsonArray() = default;
 
     public:
-        JsonValue operator[](int index) const;
-
         [[nodiscard]] int size() const;
 
         void push_back(const JsonValue &val);
