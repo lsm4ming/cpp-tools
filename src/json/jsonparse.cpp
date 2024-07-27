@@ -8,27 +8,31 @@ JsonValue JsonParse::parse(const String &str)
     return decode.parseJsonValue();
 }
 
-double JsonDecode::parseNumber()
+double JsonDecode::parseNumber(std::istringstream *stream)
 {
     std::string numberStr;
     char ch;
-    while (stream.get(ch))
+    while (stream->get(ch))
     {
         if (!std::isdigit(ch) && ch != '.' && ch != '-')
         {
-            stream.putback(ch);
+            stream->putback(ch);
             break;
         }
         numberStr += ch;
     }
+    // 是不是浮点数
+    // if (numberStr.find('.') != std::string::npos)
+    // {
+    // }
     return std::stod(numberStr);
 }
 
-String JsonDecode::parseString()
+String JsonDecode::parseString(std::istringstream *stream)
 {
     String result;
     char ch;
-    while (stream.get(ch))
+    while (stream->get(ch))
     {
         if (ch == '"')
         {
@@ -39,17 +43,16 @@ String JsonDecode::parseString()
     return result;
 }
 
-JsonObject JsonDecode::parseObject(const String &str)
+JsonObject JsonDecode::parseObject(std::istringstream *stream)
 {
     JsonObject jsonObject;
-    std::istringstream stream(str);
     char ch;
-    stream >> ch; // 读取起始大括号
+    *stream >> ch; // 读取起始大括号
     if (ch != '{')
     {
         throw std::runtime_error("Invalid JSON format: missing '{'");
     }
-    while (stream >> ch)
+    while (*stream >> ch)
     {
         if (ch == '}')
         {
@@ -61,44 +64,54 @@ JsonObject JsonDecode::parseObject(const String &str)
         }
         if (ch == '"')
         {
-            std::string key = parseString();
-            stream >> ch; // 读取冒号
+            std::string key = parseString(stream);
+            *stream >> ch; // 读取冒号
             if (ch != ':')
             {
                 throw std::runtime_error("Invalid JSON format: missing ':'");
             }
-            stream >> ch; // 读取值起始
+            *stream >> ch; // 读取值起始
             if (ch == '"')
             {
-                jsonObject[key] = parseString(stream);
-            } else if (std::isdigit(ch) || ch == '-')
+                jsonObject[key] = JsonValue(parseString(stream));
+            }
+            else if (std::isdigit(ch) || ch == '-')
             {
-                stream.putback(ch);
-                jsonObject[key] = parseNumber();
-            } else if (ch == '{')
+                stream->putback(ch);
+                jsonObject[key] = JsonValue(parseNumber(stream));
+            }
+            else if (ch == '{')
             {
                 std::string subObject = "{";
                 int braceCount = 1;
-                while (braceCount > 0 && stream.get(ch))
+                while (braceCount > 0 && stream->get(ch))
                 {
                     subObject += ch;
-                    if (ch == '{') braceCount++;
-                    if (ch == '}') braceCount--;
+                    if (ch == '{')
+                        braceCount++;
+                    if (ch == '}')
+                        braceCount--;
                 }
-                jsonObject[key] = parseObject(subObject);
-            } else if (ch == '[')
+                std::istringstream subStream(subObject);
+                jsonObject[key] = parseObject(&subStream);
+            }
+            else if (ch == '[')
             {
                 std::string subArray = "[";
                 int bracketCount = 1;
-                while (bracketCount > 0 && stream.get(ch))
+                while (bracketCount > 0 && stream->get(ch))
                 {
                     subArray += ch;
-                    if (ch == '[') bracketCount++;
-                    if (ch == ']') bracketCount--;
+                    if (ch == '[')
+                        bracketCount++;
+                    if (ch == ']')
+                        bracketCount--;
                 }
-                jsonObject[key] = parseArray(subArray);
+                std::istringstream subStream(subArray);
+                jsonObject[key] = parseArray(&subStream);
             }
-        } else
+        }
+        else
         {
             throw std::runtime_error("Invalid JSON format: missing '\"'");
         }
@@ -106,17 +119,71 @@ JsonObject JsonDecode::parseObject(const String &str)
     return jsonObject;
 }
 
-JsonObject JsonDecode::parseObject()
+JsonArray JsonDecode::parseArray(std::istringstream *stream)
 {
-    return this->parseObject(this->_str);
-}
-
-String JsonDecode::parseString(std::istringstream istringstream)
-{
-    return {};
+    JsonArray jsonArray;
+    char ch;
+    *stream >> ch; // 读取起始括号
+    if (ch != '[')
+    {
+        throw std::runtime_error("Invalid JSON format: missing '['");
+    }
+    int level = 0;
+    while (*stream >> ch)
+    {
+        if (ch == '[')
+        {
+            level++;
+        }
+        else if (ch == ']')
+        {
+            level--;
+        }
+        else if (ch == ',')
+        {
+            continue;
+        }
+        if (level == 0)
+        {
+            break;
+        }
+        if (ch == '"')
+        {
+            jsonArray.push_back(JsonValue(parseString(stream)));
+        }
+        else if (std::isdigit(ch) || ch == '-')
+        {
+            stream->putback(ch);
+            jsonArray.push_back(JsonValue(parseNumber(stream)));
+        }
+        else if (ch == '{')
+        {
+            jsonArray.push_back(parseObject(stream));
+        }
+        else if (ch == '[')
+        {
+            jsonArray.push_back(parseArray(stream));
+        }
+    }
+    return jsonArray;
 }
 
 JsonValue JsonDecode::parseJsonValue()
 {
-    return JsonValue();
+    // 去除前面的空格
+    while (_str[0] == ' ' || _str[0] == '\t' || _str[0] == '\r' || _str[0] == '\n')
+    {
+        _str.erase(0, 1);
+    }
+    // 判断是JSON对象还是JSON数组
+    std::istringstream stream(_str);
+    if (_str[0] == '{')
+    {
+        return parseObject(&stream);
+    }
+    else if (_str[0] == '[')
+    {
+        return parseArray(&stream);
+    }
+    throw std::runtime_error("invalid character 'h' looking for beginning of value");
 }

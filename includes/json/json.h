@@ -19,7 +19,7 @@ namespace cpptools::json
 
     class JsonValue;
 
-    class JsonObject
+    class JsonObject : public JsonValue
     {
     private:
         SortMap <String, JsonValue> value{};
@@ -31,7 +31,7 @@ namespace cpptools::json
         JsonValue operator[](const String &key) const;
     };
 
-    class JsonArray
+    class JsonArray : public JsonValue
     {
     private:
         List <JsonValue> value{};
@@ -41,6 +41,10 @@ namespace cpptools::json
 
     public:
         JsonValue operator[](int index) const;
+
+        [[nodiscard]] int size() const;
+
+        void push_back(const JsonValue &val);
     };
 
     union JsonData
@@ -80,7 +84,6 @@ namespace cpptools::json
         ~JsonValue();
 
     public:
-
         JsonValue operator[](int index) const;
 
         JsonValue operator[](const String &key) const;

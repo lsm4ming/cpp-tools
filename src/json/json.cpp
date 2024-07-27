@@ -51,3 +51,13 @@ JsonValue JsonArray::operator[](int index) const
 {
     return this->value[index];
 }
+
+int JsonArray::size() const
+{
+    return this->value.size();
+}
+
+void JsonArray::push_back(const JsonValue &val)
+{
+    this->value.push_back(val);
+}

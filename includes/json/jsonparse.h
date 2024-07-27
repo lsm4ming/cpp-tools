@@ -14,21 +14,17 @@ namespace cpptools::json
     private:
         String _str;
 
-        String parseString();
+        String parseString(std::istringstream *stream);
 
-        double parseNumber();
+        double parseNumber(std::istringstream *stream);
 
-        JsonObject parseObject();
+        JsonObject parseObject(std::istringstream *stream);
 
-        JsonObject parseObject(const String &str);
-
-        JsonArray parseArray();
+        JsonArray parseArray(std::istringstream *stream);
 
     public:
         explicit JsonDecode(String str) : _str(std::move(str))
         {};
-
-        String parseString(std::istringstream istringstream);
 
         JsonValue parseJsonValue();
     };
