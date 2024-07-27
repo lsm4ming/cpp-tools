@@ -143,10 +143,6 @@ JsonArray JsonDecode::parseArray(std::istringstream *stream)
         {
             continue;
         }
-        if (level == 0)
-        {
-            break;
-        }
         if (ch == '"')
         {
             jsonArray.push_back(JsonValue(parseString(stream)));
