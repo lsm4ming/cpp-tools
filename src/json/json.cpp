@@ -8,7 +8,18 @@ JsonValue JsonValue::operator[](int index) const
     {
         return JsonValue();
     }
-    return this->json_data.array_value->operator[](index);
+    auto &array = std::get<JsonArray>(value);
+    return array[index];
+}
+
+JsonValue JsonValue::nullValue()
+{
+    return JsonValue(JsonToken::NullValue, nullptr);
+}
+
+JsonValue JsonValue::objectValue()
+{
+    return JsonValue(JsonToken::ObjectValue, nullptr);
 }
 
 JsonValue JsonValue::operator[](const String &key) const
@@ -17,7 +28,47 @@ JsonValue JsonValue::operator[](const String &key) const
     {
         return JsonValue();
     }
-    return this->json_data.object_value->operator[](key);
+    const auto &obj = std::get<JsonObject>(value);
+    return obj[key];
+}
+
+JsonValue &JsonValue::operator[](const String &key)
+{
+    if (json_type != JsonToken::ObjectValue)
+    {
+        throw std::runtime_error("JsonValue is not an object.");
+    }
+    auto &obj = std::get<JsonObject>(value);
+    // 如果键不存在，则插入一个默认构造的 JsonValue
+    auto [iter, inserted] = obj.emplace(key, JsonValue());
+    return iter; // 返回对应键的引用
+}
+
+JsonValue &JsonValue::operator=(const String &str)
+{
+    this->json_type = JsonToken::StringValue;
+    this->value = str;
+    return *this;
+}
+
+JsonValue &JsonValue::operator=(const JsonValue &other)
+{
+    if (this != &other)
+    {
+        json_type = other.json_type;
+        value = other.value;
+    }
+    return *this;
+}
+
+JsonValue &JsonValue::operator=(JsonValue &&other) noexcept
+{
+    if (this != &other)
+    {
+        json_type = other.json_type;
+        value = std::move(other.value);
+    }
+    return *this;
 }
 
 JsonToken JsonValue::getType() const
@@ -27,24 +78,21 @@ JsonToken JsonValue::getType() const
 
 JsonValue::~JsonValue()
 {
-    if (this->json_type == JsonToken::ArrayValue)
-    {
-        delete this->json_data.array_value;
-        this->json_data.array_value = nullptr;
-    } else if (this->json_type == JsonToken::ObjectValue)
-    {
-        delete this->json_data.object_value;
-        this->json_data.object_value = nullptr;
-    } else if (this->json_type == JsonToken::StringValue)
-    {
-        delete this->json_data.string_value;
-        this->json_data.string_value = nullptr;
-    }
 }
 
 JsonValue JsonObject::operator[](const String &key) const
 {
     return this->value.at(key);
+}
+
+void JsonObject::insert(const String &key, const JsonValue &val)
+{
+    this->value[key] = val;
+}
+
+std::pair<String, JsonValue> JsonObject::emplace(const String &key, const JsonValue &val)
+{
+    return this->value.emplace(key, val);
 }
 
 JsonValue JsonArray::operator[](int index) const

@@ -68,9 +68,14 @@ void netTest()
 
 void jsonTest()
 {
-    auto jsonValue = cpptools::json::JsonParse::parse(R"({"a": 1, "b": 2})");
-//    std::cout << json["a"] << std::endl;
-//    std::cout << json["b"] << std::endl;
+    auto jsonValue = cpptools::json::JsonValue::objectValue();
+    jsonValue["name"] = "lsm";
+    std::cout << jsonValue.getType() << std::endl;
+    
+    auto name = jsonValue["name"];
+    std::cout << name.getType() << std::endl;
+    // auto jsonValue = cpptools::json::JsonParse::parse(R"(  {"a": 1, "b": 2})");
+    // std::cout << jsonValue.getType() << std::endl;
 }
 
 int main()
