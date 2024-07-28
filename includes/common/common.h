@@ -32,7 +32,7 @@ namespace cpptools::common
     using VectorList = std::vector<Vector<T>>;
 
     template<typename T>
-    using List =  std::vector<T>;
+    using List = std::vector<T>;
 
     using StringMap = std::unordered_map<String, String>;
 
@@ -46,4 +46,7 @@ namespace cpptools::common
 
     template<typename T>
     using SharedPtr = std::shared_ptr<T>;
+
+    template<typename T>
+    using UniquePtr = std::unique_ptr<T>;
 }

@@ -2,7 +2,7 @@
 
 using namespace cpptools::json;
 
-JsonValue JsonParse::parse(const String &str)
+JsonValuer JsonParse::parse(const String &str)
 {
     JsonDecode decode(str);
     return decode.parseJsonValue();
@@ -43,9 +43,9 @@ String JsonDecode::parseString(std::istringstream *stream)
     return result;
 }
 
-JsonObject JsonDecode::parseObject(std::istringstream *stream)
+JsonValuer JsonDecode::parseObject(std::istringstream *stream)
 {
-    JsonObject jsonObject;
+    auto jsonObject = std::make_shared<JsonObject>();
     char ch;
     *stream >> ch; // 读取起始大括号
     if (ch != '{')
@@ -73,14 +73,12 @@ JsonObject JsonDecode::parseObject(std::istringstream *stream)
             *stream >> ch; // 读取值起始
             if (ch == '"')
             {
-                jsonObject[key] = JsonValue(parseString(stream));
-            }
-            else if (std::isdigit(ch) || ch == '-')
+                jsonObject->insert(key, std::make_shared<JsonValue>(parseString(stream)));
+            } else if (std::isdigit(ch) || ch == '-')
             {
                 stream->putback(ch);
-                jsonObject[key] = JsonValue(parseNumber(stream));
-            }
-            else if (ch == '{')
+                jsonObject->insert(key, std::make_shared<JsonValue>(parseNumber(stream)));
+            } else if (ch == '{')
             {
                 std::string subObject = "{";
                 int braceCount = 1;
@@ -93,9 +91,8 @@ JsonObject JsonDecode::parseObject(std::istringstream *stream)
                         braceCount--;
                 }
                 std::istringstream subStream(subObject);
-                jsonObject[key] = parseObject(&subStream);
-            }
-            else if (ch == '[')
+                jsonObject->insert(key, parseObject(&subStream));
+            } else if (ch == '[')
             {
                 std::string subArray = "[";
                 int bracketCount = 1;
@@ -108,20 +105,19 @@ JsonObject JsonDecode::parseObject(std::istringstream *stream)
                         bracketCount--;
                 }
                 std::istringstream subStream(subArray);
-                jsonObject[key] = parseArray(&subStream);
+                jsonObject->insert(key, parseArray(&subStream));
             }
-        }
-        else
+        } else
         {
             throw std::runtime_error("Invalid JSON format: missing '\"'");
         }
     }
-    return jsonObject;
+    return std::make_shared<JsonValue>(jsonObject);
 }
 
-JsonArray JsonDecode::parseArray(std::istringstream *stream)
+JsonValuer JsonDecode::parseArray(std::istringstream *stream)
 {
-    JsonArray jsonArray;
+    auto jsonArray = std::make_shared<JsonArray>();
     char ch;
     *stream >> ch; // 读取起始括号
     if (ch != '[')
@@ -134,50 +130,41 @@ JsonArray JsonDecode::parseArray(std::istringstream *stream)
         if (ch == '[')
         {
             level++;
-        }
-        else if (ch == ']')
+        } else if (ch == ']')
         {
             level--;
-        }
-        else if (ch == ',')
+        } else if (ch == ',')
         {
             continue;
         }
         if (ch == '"')
         {
-            jsonArray.push_back(JsonValue(parseString(stream)));
-        }
-        else if (std::isdigit(ch) || ch == '-')
+            jsonArray->push_back(std::make_shared<JsonValue>(JsonValue(parseString(stream))));
+        } else if (std::isdigit(ch) || ch == '-')
         {
             stream->putback(ch);
-            jsonArray.push_back(JsonValue(parseNumber(stream)));
-        }
-        else if (ch == '{')
+            jsonArray->push_back(std::make_shared<JsonValue>(JsonValue(parseNumber(stream))));
+        } else if (ch == '{')
         {
-            jsonArray.push_back(parseObject(stream));
-        }
-        else if (ch == '[')
+            jsonArray->push_back(parseObject(stream));
+        } else if (ch == '[')
         {
-            jsonArray.push_back(parseArray(stream));
+            jsonArray->push_back(parseArray(stream));
         }
     }
-    return jsonArray;
+    return std::make_shared<JsonValue>(jsonArray);
 }
 
-JsonValue JsonDecode::parseJsonValue()
+JsonValuer JsonDecode::parseJsonValue()
 {
-    // 去除前面的空格
-    while (_str[0] == ' ' || _str[0] == '\t' || _str[0] == '\r' || _str[0] == '\n')
-    {
-        _str.erase(0, 1);
-    }
+    // 去除前面的空格和换行
+    _str.erase(0, _str.find_first_not_of(" \t\r\n"));
     // 判断是JSON对象还是JSON数组
     std::istringstream stream(_str);
     if (_str[0] == '{')
     {
         return parseObject(&stream);
-    }
-    else if (_str[0] == '[')
+    } else if (_str[0] == '[')
     {
         return parseArray(&stream);
     }

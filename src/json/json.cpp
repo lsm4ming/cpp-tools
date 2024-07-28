@@ -2,45 +2,21 @@
 
 using namespace cpptools::json;
 
-JsonValue JsonValue::operator[](int index)
+JsonValue &JsonValue::operator[](int index)
 {
-    if (this->json_type != JsonToken::ArrayValue)
-    {
-        return JsonValue();
-    }
-    const auto &array = std::get<SharedPtr<JsonArray>>(value);
-    return array.get()[index];
-}
-
-JsonValue JsonValue::nullValue()
-{
-    return JsonValue(JsonToken::NullValue, nullptr);
-}
-
-JsonValue JsonValue::objectValue()
-{
-    return JsonValue(JsonToken::ObjectValue, nullptr);
+    this->checkType(JsonToken::ArrayValue);
+    return *(std::get<SharedPtr<JsonArray>>(value)->get(index));
 }
 
 JsonValue &JsonValue::operator[](const String &key)
 {
-    if (json_type != JsonToken::ObjectValue)
-    {
-        json_type = JsonToken::ObjectValue;
-    }
+    this->checkType(JsonToken::ObjectValue);
     if (!std::holds_alternative<SharedPtr<JsonObject>>(value))
     {
         value = std::make_shared<JsonObject>();
     }
-    auto obj = std::get<SharedPtr<JsonObject>>(value);
-    return obj->emplace(key, JsonValue());
-}
-
-JsonValue &JsonValue::operator=(const String &str)
-{
-    this->json_type = JsonToken::StringValue;
-    this->value = str;
-    return *this;
+    auto object = std::get<SharedPtr<JsonObject>>(value);
+    return *object->emplace(key, std::make_shared<JsonValue>(JsonValue{}));
 }
 
 JsonValue &JsonValue::operator=(const JsonValue &other)
@@ -68,19 +44,30 @@ JsonToken JsonValue::getType() const
     return this->json_type;
 }
 
+void JsonValue::checkType(JsonToken target)
+{
+    if (json_type == JsonToken::NullValue)
+    {
+        json_type = target;
+    } else if (json_type != target)
+    {
+        throw std::runtime_error("Invalid JSON format: invalid type");
+    }
+}
+
 JsonValue::~JsonValue() = default;
 
-void JsonObject::insert(const String &key, const JsonValue &val)
+void JsonObject::insert(const String &key, const JsonValuer &val)
 {
     this->value[key] = val;
 }
 
-JsonValue JsonObject::get(const String &key)
+JsonValuer JsonObject::get(const String &key)
 {
     return this->value[key];
 }
 
-JsonValue &JsonObject::emplace(const String &key, const JsonValue &val)
+JsonValuer &JsonObject::emplace(const String &key, const JsonValuer &val)
 {
     auto [iter, ok] = this->value.emplace(key, val);
     return iter->second;
@@ -91,7 +78,12 @@ int JsonArray::size() const
     return static_cast<int>(value.size());
 }
 
-void JsonArray::push_back(const JsonValue &val)
+void JsonArray::push_back(const JsonValuer &val)
 {
     this->value.push_back(val);
+}
+
+JsonValuer &JsonArray::get(int index)
+{
+    return this->value.at(index);
 }

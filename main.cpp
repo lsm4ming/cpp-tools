@@ -66,19 +66,27 @@ void netTest()
     std::cout << "udpSocket sendTo result:" << udpSocket->sendTo(buf, sizeof(buf)) << std::endl;
 }
 
+cpptools::json::JsonValue getTestValue()
+{
+    auto jsonValue = cpptools::json::JsonValue();
+    jsonValue["name"] = "lsm";
+    jsonValue["age"] = 30;
+    return jsonValue;
+}
+
 void jsonTest()
 {
-    auto jsonValue = cpptools::json::JsonValue::objectValue();
-    jsonValue["name"] = "lsm";
+    auto jsonValue = getTestValue();
     std::cout << jsonValue.getType() << std::endl;
-
     auto name = jsonValue["name"];
     std::cout << name.getType() << std::endl;
+
+
     auto objectValue = cpptools::json::JsonParse::parse(R"(  {"a": 1, "b": 2.5 , "c":"hello"})");
-    std::cout << objectValue.getType() << std::endl;
+    std::cout << (*objectValue).getType() << std::endl;
 
     auto arrayValue = cpptools::json::JsonParse::parse(R"(  [1, 2.5, "hello"])");
-    std::cout << arrayValue.getType() << std::endl;
+    std::cout << (*arrayValue).getType() << std::endl;
 }
 
 int main()

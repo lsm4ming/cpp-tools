@@ -18,20 +18,20 @@ namespace cpptools::json
 
         double parseNumber(std::istringstream *stream);
 
-        JsonObject parseObject(std::istringstream *stream);
+        JsonValuer parseObject(std::istringstream *stream);
 
-        JsonArray parseArray(std::istringstream *stream);
+        JsonValuer parseArray(std::istringstream *stream);
 
     public:
         explicit JsonDecode(String str) : _str(std::move(str))
         {};
 
-        JsonValue parseJsonValue();
+        JsonValuer parseJsonValue();
     };
 
     class JsonParse
     {
     public:
-        static JsonValue parse(const String &str);
+        static JsonValuer parse(const String &str);
     };
 }

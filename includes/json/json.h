@@ -27,6 +27,8 @@ namespace cpptools::json
 
     class JsonArray;
 
+    using JsonValuer = SharedPtr<JsonValue>;
+
     using JsonVariant = std::variant<std::nullptr_t, bool, int, double, String,
             SharedPtr < JsonObject>, SharedPtr <JsonArray>>;
 
@@ -38,6 +40,8 @@ namespace cpptools::json
 
         explicit JsonValue(JsonToken type, JsonVariant value) : json_type(type), value(std::move(value))
         {};
+
+        void checkType(JsonToken target);
 
     public:
         explicit JsonValue() : JsonValue(JsonToken::NullValue, nullptr)
@@ -61,8 +65,7 @@ namespace cpptools::json
         explicit JsonValue(const SharedPtr <JsonArray> &val) : JsonValue(JsonToken::ArrayValue, val)
         {};
 
-        JsonValue(const JsonValue &other) : json_type(other.json_type), value(other.value)
-        {};
+        JsonValue(const JsonValue &other) = default;
 
         JsonValue(JsonValue &&other) noexcept: json_type(other.json_type), value(std::move(other.value))
         {};
@@ -76,39 +79,80 @@ namespace cpptools::json
     public:
         // std::ostream &operator<<(std::ostream &os, const JsonValue &json_value)
 
-        static JsonValue nullValue();
-
-        static JsonValue objectValue();
-
-        JsonValue operator[](int index);
+        JsonValue &operator[](int index);
 
         JsonValue &operator[](const String &key);
 
-        JsonValue &operator=(const String &str);
-
         [[nodiscard]] JsonToken getType() const;
+
+        // 处理字符串字面量的重载
+        template<std::size_t N>
+        JsonValue &operator=(const char (&arr)[N])
+        {
+            json_type = JsonToken::StringValue;
+            value = arr;
+            return *this;
+        }
+
+        template<class T>
+        JsonValue &operator=(const T &val)
+        {
+            // 使用static_assert在编译时捕捉不支持的类型
+            static_assert(!std::is_pointer<T>::value || std::is_same<T, const char *>::value,
+                          "不支持将指针类型分配给JsonValue");
+            value = val;
+            if constexpr (std::is_same<T, bool>::value)
+            {
+                json_type = JsonToken::BoolValue;
+            } else if constexpr (std::is_same<T, int>::value)
+            {
+                json_type = JsonToken::IntValue;
+            } else if constexpr (std::is_same<T, double>::value)
+            {
+                json_type = JsonToken::DoubleValue;
+            } else if constexpr (std::is_same<T, char *>::value)
+            {
+                json_type = JsonToken::StringValue;
+            } else if constexpr (std::is_same<T, char (&)[]>::value)
+            {
+                json_type = JsonToken::StringValue;
+            } else if constexpr (std::is_same<T, String>::value)
+            {
+                json_type = JsonToken::StringValue;
+            } else if constexpr (std::is_same<T, JsonObject>::value)
+            {
+                json_type = JsonToken::ObjectValue;
+            } else if constexpr (std::is_same<T, JsonArray>::value)
+            {
+                json_type = JsonToken::ArrayValue;
+            } else
+            {
+                json_type = JsonToken::NullValue;
+            }
+            return *this;
+        }
     };
 
     class JsonObject : public JsonValue
     {
     private:
-        SortMap <String, JsonValue> value{};
+        SortMap <String, JsonValuer> value{};
 
     public:
         JsonObject() = default;
 
     public:
-        void insert(const String &key, const JsonValue &val);
+        void insert(const String &key, const JsonValuer &val);
 
-        JsonValue get(const String &key);
+        JsonValuer get(const String &key);
 
-        JsonValue& emplace(const String &key, const JsonValue &val);
+        JsonValuer &emplace(const String &key, const JsonValuer &val);
     };
 
     class JsonArray : public JsonValue
     {
     private:
-        List <JsonValue> value{};
+        List <JsonValuer> value{};
 
     public:
         JsonArray() = default;
@@ -116,6 +160,8 @@ namespace cpptools::json
     public:
         [[nodiscard]] int size() const;
 
-        void push_back(const JsonValue &val);
+        void push_back(const JsonValuer &val);
+
+        JsonValuer &get(int index);
     };
 }
