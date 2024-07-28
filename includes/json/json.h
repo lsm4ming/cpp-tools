@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <utility>
 #include <variant>
+#include <sstream>
 #include "common/common.h"
 
 using namespace cpptools::common;
@@ -77,7 +78,7 @@ namespace cpptools::json
         ~JsonValue();
 
     public:
-        // std::ostream &operator<<(std::ostream &os, const JsonValue &json_value)
+        friend std::ostream &operator<<(std::ostream &os, const JsonValue &val);
 
         JsonValue &operator[](int index);
 
@@ -131,6 +132,8 @@ namespace cpptools::json
             }
             return *this;
         }
+
+        [[nodiscard]] virtual String toString() const;
     };
 
     class JsonObject : public JsonValue
@@ -147,6 +150,8 @@ namespace cpptools::json
         JsonValuer get(const String &key);
 
         JsonValuer &emplace(const String &key, const JsonValuer &val);
+
+        String toString() const override;
     };
 
     class JsonArray : public JsonValue
@@ -163,5 +168,7 @@ namespace cpptools::json
         void push_back(const JsonValuer &val);
 
         JsonValuer &get(int index);
+
+        String toString() const override;
     };
 }

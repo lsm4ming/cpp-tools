@@ -2,10 +2,16 @@
 
 using namespace cpptools::json;
 
-JsonValuer JsonParse::parse(const String &str)
+JsonValue JsonParse::parse(const String &str)
 {
     JsonDecode decode(str);
-    return decode.parseJsonValue();
+    auto result =decode.parseJsonValue();
+    // 判断智能指针是否为空
+    if (result == nullptr)
+    {
+        throw std::runtime_error("Invalid JSON format: null pointer");
+    }
+    return *result;
 }
 
 double JsonDecode::parseNumber(std::istringstream *stream)

@@ -32,6 +32,6 @@ namespace cpptools::json
     class JsonParse
     {
     public:
-        static JsonValuer parse(const String &str);
+        static JsonValue parse(const String &str);
     };
 }

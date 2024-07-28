@@ -55,7 +55,44 @@ void JsonValue::checkType(JsonToken target)
     }
 }
 
-JsonValue::~JsonValue() = default;
+std::ostream &cpptools::json::operator<<(std::ostream &os, const JsonValue &val)
+{
+    os << val.toString();
+    return os;
+}
+
+String JsonValue::toString() const
+{
+    String result;
+    switch (json_type)
+    {
+        case JsonToken::BoolValue:
+            return std::get<bool>(value) ? "true" : "false";
+        case JsonToken::IntValue:
+            return std::to_string(std::get<int>(value));
+        case JsonToken::DoubleValue:
+            return std::to_string(std::get<double>(value));
+        case JsonToken::StringValue:
+            return "\"" + std::get<String>(value) + "\"";
+        case JsonToken::ArrayValue:
+            if (!std::holds_alternative<SharedPtr<JsonArray>>(value))
+            {
+                return "[]";
+            }
+            return std::get<SharedPtr<JsonArray>>(value)->toString();
+        case JsonToken::ObjectValue:
+            if (!std::holds_alternative<SharedPtr<JsonObject>>(value))
+            {
+                return "{}";
+            }
+            return std::get<SharedPtr<JsonObject>>(value)->toString();
+        default:
+            return "null";
+    }
+}
+
+JsonValue::~JsonValue() =
+default;
 
 void JsonObject::insert(const String &key, const JsonValuer &val)
 {
@@ -73,6 +110,22 @@ JsonValuer &JsonObject::emplace(const String &key, const JsonValuer &val)
     return iter->second;
 }
 
+String JsonObject::toString() const
+{
+    std::ostringstream os;
+    os << "{";
+    for (auto it = value.begin(); it != value.end(); ++it)
+    {
+        os << "\"" << it->first << "\":" << it->second->toString();
+        if (std::next(it) != value.end())
+        { // 判断是否为最后一个元素
+            os << ",";
+        }
+    }
+    os << "}";
+    return os.str();
+}
+
 int JsonArray::size() const
 {
     return static_cast<int>(value.size());
@@ -86,4 +139,20 @@ void JsonArray::push_back(const JsonValuer &val)
 JsonValuer &JsonArray::get(int index)
 {
     return this->value.at(index);
+}
+
+String JsonArray::toString() const
+{
+    std::ostringstream os;
+    os << "[";
+    for (auto &item: this->value)
+    {
+        os << item->toString();
+        if (item != this->value.back())
+        {
+            os << ",";
+        }
+    }
+    os << "]";
+    return os.str();
 }
