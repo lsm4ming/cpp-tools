@@ -1,7 +1,5 @@
 #pragma once
 
-#include <sstream>
-#include <utility>
 #include "common/common.h"
 #include "json.h"
 
@@ -14,9 +12,9 @@ namespace cpptools::json
     private:
         String _str;
 
-        String parseString(std::istringstream *stream);
+        static String parseString(std::istringstream *stream);
 
-        double parseNumber(std::istringstream *stream);
+        static double parseNumber(std::istringstream *stream);
 
         JsonValuer parseObject(std::istringstream *stream);
 

@@ -126,6 +126,11 @@ String JsonObject::toString() const
     return os.str();
 }
 
+SharedPtr<JsonObject> JsonObject::newObject()
+{
+    return std::make_shared<JsonObject>();
+}
+
 int JsonArray::size() const
 {
     return static_cast<int>(value.size());
@@ -155,4 +160,9 @@ String JsonArray::toString() const
     }
     os << "]";
     return os.str();
+}
+
+SharedPtr<JsonArray> JsonArray::newArray()
+{
+    return std::make_shared<JsonArray>();
 }

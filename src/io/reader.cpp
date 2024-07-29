@@ -4,13 +4,13 @@ namespace cpptools::io
 {
     FileReader::~FileReader()
     {
-        this->close();
+        this->_file.close();
     }
 
     int FileReader::read(char *data, uint32 length)
     {
         this->_file.read(data, length);
-        return this->_file.gcount();
+        return static_cast<int>(this->_file.gcount());
     }
 
     bool FileReader::eof()

@@ -101,7 +101,8 @@ namespace cpptools::json
             // 使用static_assert在编译时捕捉不支持的类型
             static_assert(!std::is_pointer<T>::value || std::is_same<T, const char *>::value,
                           "不支持将指针类型分配给JsonValue");
-            value = val;
+            value = static_cast<const JsonVariant>(val);
+
             if constexpr (std::is_same<T, bool>::value)
             {
                 json_type = JsonToken::BoolValue;
@@ -120,10 +121,10 @@ namespace cpptools::json
             } else if constexpr (std::is_same<T, String>::value)
             {
                 json_type = JsonToken::StringValue;
-            } else if constexpr (std::is_same<T, JsonObject>::value)
+            } else if constexpr (std::is_same<T, JsonObject>::value || std::is_same<T, SharedPtr<JsonObject>>::value)
             {
                 json_type = JsonToken::ObjectValue;
-            } else if constexpr (std::is_same<T, JsonArray>::value)
+            } else if constexpr (std::is_same<T, JsonArray>::value || std::is_same<T, SharedPtr<JsonArray>>::value)
             {
                 json_type = JsonToken::ArrayValue;
             } else
@@ -144,6 +145,8 @@ namespace cpptools::json
     public:
         JsonObject() = default;
 
+        static SharedPtr <JsonObject> newObject();
+
     public:
         void insert(const String &key, const JsonValuer &val);
 
@@ -161,6 +164,8 @@ namespace cpptools::json
 
     public:
         JsonArray() = default;
+
+        static SharedPtr <JsonArray> newArray();
 
     public:
         [[nodiscard]] int size() const;

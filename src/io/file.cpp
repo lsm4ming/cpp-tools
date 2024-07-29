@@ -2,9 +2,7 @@
 
 namespace cpptools::io
 {
-    File::~File()
-    {
-    }
+    File::~File() = default;
 
     bool File::exists() const
     {
