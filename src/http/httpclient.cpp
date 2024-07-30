@@ -4,7 +4,7 @@ namespace cpptools::http
 {
     HttpClient *HttpClient::setQuery(const String &key, const String &value)
     {
-        this->request.setQuery(key, value);
+        this->_request.setQuery(key, value);
         return this;
     }
 
@@ -103,6 +103,6 @@ namespace cpptools::http
     HttpResponse HttpClient::doSend(const HttpRequest &request)
     {
         this->_request = request;
-        return this->doSend(request.method, request.rawUrl);
+        return this->doSend(request._method, request._rawUrl);
     }
 }

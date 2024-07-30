@@ -1,6 +1,7 @@
 #pragma once
 
 #include "define.h"
+#include "httpresponse.h"
 
 namespace cpptools::http
 {
@@ -24,8 +25,8 @@ namespace cpptools::http
 
     public:
         HttpRequest() = default;
-        HttpRequest(HttpMethod method, String url) : _method(method), _rawUrl(url) {}
-        HttpRequest(String url) : _rawUrl(url) {}
+        HttpRequest(HttpMethod method, String url) : _method(method), _rawUrl(std::move(url)) {}
+        explicit HttpRequest(String url) : _rawUrl(std::move(url)) {}
         ~HttpRequest() = default;
 
         void setQuery(const String &key, const String &value);
@@ -53,9 +54,9 @@ namespace cpptools::http
 
         String encodeQueryParameters();
 
-        int http_create_socket(const String &ip);
+        static int http_create_socket(const String &ip);
 
-        Header parseQuery(const String &queryRaw);
+        static Header parseQuery(const String &queryRaw);
 
         HttpResponse send();
     };

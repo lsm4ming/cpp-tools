@@ -99,7 +99,8 @@ void jsonTest()
 void httpClientTest()
 {
     cpptools::http::HttpClient httpClient;
-    std::cout << httpClient.get("https://www.baidu.com") << std::endl;
+    auto response = httpClient.get("https://www.baidu.com");
+    std::cout << response.getBody() << std::endl;
 }
 
 int main()

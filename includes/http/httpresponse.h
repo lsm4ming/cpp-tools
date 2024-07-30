@@ -11,16 +11,16 @@ namespace cpptools::http
     private:
         int _code{};
         String _status;
-        String body;
+        String _body;
         size_t _length{};
         Header _header;
 
     public:
-        int statusCode() const;
+        [[nodiscard]] int statusCode() const;
 
-        String httpStatus() const;
+        [[nodiscard]] String httpStatus() const;
 
-        String getBody() const;
+        [[nodiscard]] String getBody() const;
 
     private:
         void readResponse(int fd);

@@ -14,17 +14,16 @@ namespace cpptools::http
 
     void HttpRequest::setQuery(const String &key, const Vector<String> &values)
     {
-        this->query[key] = values;
+        this->_query[key] = values;
     }
 
     void HttpRequest::addQuery(const String &key, const Vector<String> &values)
     {
-        auto val = this->query.find(key);
-        if (val == this->query.end())
+        auto val = this->_query.find(key);
+        if (val == this->_query.end())
         {
             this->setQuery(key, values);
-        }
-        else
+        } else
         {
             val->second.insert(val->second.end(), values.begin(), values.end());
         }
@@ -42,17 +41,16 @@ namespace cpptools::http
 
     void HttpRequest::setHeader(const String &key, const Vector<String> &values)
     {
-        this->header[key] = values;
+        this->_header[key] = values;
     }
 
     void HttpRequest::addHeader(const String &key, const Vector<String> &values)
     {
-        auto val = this->header.find(key);
-        if (val == this->header.end())
+        auto val = this->_header.find(key);
+        if (val == this->_header.end())
         {
             this->setHeader(key, values);
-        }
-        else
+        } else
         {
             val->second.insert(val->second.end(), values.begin(), values.end());
         }
@@ -72,12 +70,12 @@ namespace cpptools::http
 
     HttpResponse HttpRequest::post(const String &url)
     {
-        return this->doSend("POST", url);
+        return this->doSend(HttpMethod::HTTP_POST, url);
     }
 
     HttpResponse HttpRequest::get(const String &url)
     {
-        return this->doSend("GET", url);
+        return this->doSend(HttpMethod::HTTP_GET, url);
     }
 
     HttpResponse HttpRequest::doSend(const HttpMethod &method, const String &url)
@@ -89,17 +87,17 @@ namespace cpptools::http
         // 匹配URL
         if (std::regex_match(url, url_match_result, url_regex) && url_match_result.size() >= 5)
         {
-            this->protocol = url_match_result[1].str();
-            this->domain = url_match_result[2].str();
-            this->path = url_match_result[3].str();
-            this->queryRaw = url_match_result[4].str();
+            this->_protocol = url_match_result[1].str();
+            this->_domain = url_match_result[2].str();
+            this->_path = url_match_result[3].str();
+            this->_queryRaw = url_match_result[4].str();
 
-            if (this->path.empty())
+            if (this->_path.empty())
             {
-                this->path = "/";
+                this->_path = "/";
             }
 
-            for (auto &item : this->parseQuery(this->queryRaw))
+            for (auto &item: this->parseQuery(this->_queryRaw))
             {
                 this->addQuery(item.first, item.second);
             }
@@ -115,23 +113,23 @@ namespace cpptools::http
         {
             return "";
         }
-        auto **addr_list = (struct in_addr **)he->h_addr_list;
+        auto **addr_list = (struct in_addr **) he->h_addr_list;
         return inet_ntoa(*addr_list[0]);
     }
 
     int HttpRequest::http_create_socket(const String &ip)
     {
-        int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        int fd = socket(AF_INET, SOCK_STREAM, 0);
         struct sockaddr_in sin = {0};
         sin.sin_family = AF_INET;
         sin.sin_port = htons(80); //
         sin.sin_addr.s_addr = inet_addr(ip.c_str());
-        if (0 != connect(sockfd, (struct sockaddr *)&sin, sizeof(struct sockaddr_in)))
+        if (0 != connect(fd, (struct sockaddr *) &sin, sizeof(struct sockaddr_in)))
         {
             return -1;
         }
         // fcntl(sockfd, F_SETFL, O_NONBLOCK);
-        return sockfd;
+        return fd;
     }
 
     Header HttpRequest::parseQuery(const String &queryRaw)
@@ -183,29 +181,29 @@ namespace cpptools::http
     HttpResponse HttpRequest::send()
     {
         // 组装请求url
-        this->rawUrl = assembleUrl();
+        this->_rawUrl = assembleUrl();
 
         // 将domain转为IP地址
-        String ip = HttpRequest::host_to_ip(this->domain);
+        String ip = HttpRequest::host_to_ip(this->_domain);
 
         // 建立TCP连接
-        this->socketFd = this->http_create_socket(ip);
+        this->_fd = HttpRequest::http_create_socket(ip);
 
         OsStringStream stream;
 
         // 写请求行
-        stream << _method << EMPTY << _path << EMPTY << HTTP_VERSION << WRAP;
+        stream << methodToString(_method) << EMPTY << _path << EMPTY << HTTP_VERSION << WRAP;
         // 写请求头
-        for (auto &item : this->header)
+        for (auto &item: this->_header)
         {
             stream << item.first << ": " << joinValues(item.second) << WRAP;
         }
         stream << WRAP;
-        write(socketFd, stream.str().c_str(), stream.str().length());
+        write(this->_fd, stream.str().c_str(), stream.str().length());
         // 写请求体
         if (this->_body && this->_length > 0)
         {
-            write(socketFd, this->_body, this->_length);
+            write(this->_fd, this->_body, this->_length);
         }
 
         HttpResponse response;
@@ -218,15 +216,15 @@ namespace cpptools::http
     String HttpRequest::assembleUrl()
     {
         OsStringStream url;
-        url << protocol << "://" << domain;
+        url << _protocol << "://" << _domain;
 
-        if (!path.empty())
+        if (!_path.empty())
         {
-            if (path.front() != '/')
+            if (_path.front() != '/')
             {
                 url << '/';
             }
-            url << path;
+            url << _path;
         }
         String encodedQuery = encodeQueryParameters();
         if (!encodedQuery.empty())
@@ -240,11 +238,11 @@ namespace cpptools::http
     String HttpRequest::encodeQueryParameters()
     {
         OsStringStream queryStream;
-        for (auto it = query.begin(); it != query.end(); ++it)
+        for (auto it = _query.begin(); it != _query.end(); ++it)
         {
-            for (const auto &value : it->second)
+            for (const auto &value: it->second)
             {
-                if (it != query.begin() || &value != &it->second.front())
+                if (it != _query.begin() || &value != &it->second.front())
                 {
                     queryStream << '&';
                 }
@@ -257,10 +255,10 @@ namespace cpptools::http
     void HttpRequest::set_socket_timeout(int fd, int seconds)
     {
         struct timeval timeout
-        {
-        };
+                {
+                };
         timeout.tv_sec = seconds;
         timeout.tv_usec = 0;
-        setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout, sizeof(timeout));
+        setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char *) &timeout, sizeof(timeout));
     }
 }

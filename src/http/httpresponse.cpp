@@ -47,7 +47,7 @@ namespace cpptools::http
             String key = headerLine.substr(0, index);
             String value = headerLine.substr(index + 1);
             value.pop_back();
-            this->header[key] = {value};
+            this->_header[key] = {value};
             if ("Content-Length" == key)
             {
                 this->_length = std::stoi(value);
