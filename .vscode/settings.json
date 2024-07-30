@@ -73,6 +73,9 @@
         "stop_token": "cpp",
         "thread": "cpp",
         "map": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "unordered_set": "cpp",
+        "bitset": "cpp",
+        "regex": "cpp"
     }
 }

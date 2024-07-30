@@ -49,4 +49,6 @@ namespace cpptools::common
 
     template<typename T>
     using UniquePtr = std::unique_ptr<T>;
+
+    using OsStringStream = std::ostringstream;
 }

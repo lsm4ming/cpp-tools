@@ -6,6 +6,7 @@
 #include "net/socket.h"
 #include "net/datagram.h"
 #include "json/jsonparse.h"
+#include "http/httpclient.h"
 
 void ioTest()
 {
@@ -95,11 +96,18 @@ void jsonTest()
     std::cout << jsonValue << std::endl;
 }
 
+void httpClientTest()
+{
+    cpptools::http::HttpClient httpClient;
+    std::cout << httpClient.get("https://www.baidu.com") << std::endl;
+}
+
 int main()
 {
     // ioTest();
     timeTest();
     netTest();
     jsonTest();
+    httpClientTest();
     return 0;
 }
