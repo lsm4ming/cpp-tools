@@ -9,3 +9,12 @@ FetchContent_Declare(
 )
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
+
+# 下载boots
+#FetchContent_Declare(
+#        boots
+#        GIT_REPOSITORY https://github.com/boostorg/boost.git
+#        GIT_TAG boost-1.85.0
+#        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+#)
+#FetchContent_MakeAvailable(boots)
