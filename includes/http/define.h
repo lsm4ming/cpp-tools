@@ -3,6 +3,7 @@
 #include <regex>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <unistd.h>
 #include "common/common.h"
 
 using namespace cpptools::common;

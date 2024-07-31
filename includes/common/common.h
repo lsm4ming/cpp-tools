@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <map>
 #include <memory>
+#include <sstream>
 
 namespace cpptools::common
 {
