@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
-
+#include <netinet/tcp.h>
 #include <utility>
 #include "common/common.h"
 
@@ -37,8 +37,14 @@ namespace cpptools::net
         int connect();
         int connect(const String &host, uint16 port);
         [[nodiscard]] int setBlocking(bool blocking) const;
-        int send(char* data, uint32 length);
-        int receive(char* data, uint32 length) const;
+        [[nodiscard]] int setKeepalive(bool keepalive) const;
+        [[nodiscard]] int setReuseaddr(bool reuseaddr) const;
+        [[nodiscard]] int setReuseport(bool reuseport) const;
+        [[nodiscard]] int setTcpNoDelay(bool tcpNoDelay) const;
+
+        ssize_t send(char* data, uint32 length) const;
+        ssize_t receive(char* data, uint32 length) const;
+
         void close();
     };
 }

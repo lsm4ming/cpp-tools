@@ -7,6 +7,7 @@
 #include "net/datagram.h"
 #include "json/jsonparse.h"
 #include "http/httpclient.h"
+#include "poll/poll.h"
 
 void ioTest()
 {
@@ -103,6 +104,12 @@ void httpClientTest()
     std::cout << response.getBody() << std::endl;
 }
 
+void pollTest()
+{
+    cpptools::poll::PollEvent poll;
+    poll.run();
+}
+
 int main()
 {
     // ioTest();
@@ -110,5 +117,6 @@ int main()
     netTest();
     jsonTest();
     httpClientTest();
+    pollTest();
     return 0;
 }

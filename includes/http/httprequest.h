@@ -21,7 +21,7 @@ namespace cpptools::http
         Header _query;
         char *_body{};
         size_t _length{};
-        int _fd{};
+        int _fd{-1};
 
     public:
         HttpRequest() = default;

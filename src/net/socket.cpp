@@ -64,7 +64,7 @@ int cpptools::net::Socket::setBlocking(bool blocking) const
     return fcntl(this->_fd, F_SETFL, flags | O_NONBLOCK);
 }
 
-int cpptools::net::Socket::send(char *data, uint32 length)
+ssize_t cpptools::net::Socket::send(char *data, uint32 length) const
 {
     if (this->_connected)
     {
@@ -73,7 +73,7 @@ int cpptools::net::Socket::send(char *data, uint32 length)
     return -1;
 }
 
-int cpptools::net::Socket::receive(char *data, uint32 length) const
+ssize_t cpptools::net::Socket::receive(char *data, uint32 length) const
 {
     if (this->_connected)
     {
@@ -90,4 +90,28 @@ void cpptools::net::Socket::close()
         this->_connected = false;
         this->_fd = -1;
     }
+}
+
+int cpptools::net::Socket::setKeepalive(bool keepalive) const
+{
+    int optVal = keepalive ? 1 : 0;
+    return ::setsockopt(this->_fd, SOL_SOCKET, SO_KEEPALIVE, &optVal, sizeof(optVal));
+}
+
+int cpptools::net::Socket::setReuseaddr(bool reuseaddr) const
+{
+    int optVal = reuseaddr ? 1 : 0;
+    return ::setsockopt(this->_fd, SOL_SOCKET, SO_REUSEADDR, &optVal, sizeof(optVal));
+}
+
+int cpptools::net::Socket::setReuseport(bool reuseport) const
+{
+    int optVal = reuseport ? 1 : 0;
+    return ::setsockopt(this->_fd, SOL_SOCKET, SO_REUSEADDR, &optVal, sizeof(optVal));
+}
+
+int cpptools::net::Socket::setTcpNoDelay(bool tcpNoDelay) const
+{
+    int optVal = tcpNoDelay ? 1 : 0;
+    return ::setsockopt(this->_fd, IPPROTO_TCP, TCP_NODELAY, &optVal, sizeof(optVal));
 }
