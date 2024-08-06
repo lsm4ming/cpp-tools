@@ -38,7 +38,7 @@ namespace cpptools::pollEvent
             std::vector<Channel *> channels = ep_->loop(10 * 1000);         // 等待监视的fd有事件发生。
 
             // 如果channels为空，表示超时，回调TcpServer::epolltimeout()。
-            if (channels.size() == 0)
+            if (channels.empty())
             {
                 epolltimeoutcallback_(this);
             } else

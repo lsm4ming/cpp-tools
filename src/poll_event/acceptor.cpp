@@ -26,6 +26,7 @@ namespace cpptools::pollEvent
         std::unique_ptr<Socket> clientsock(new Socket(servsock_.accept(clientaddr)));
         clientsock->setHost(clientaddr.ip());
         clientsock->setPort(clientaddr.port());
+        clientsock->setBlocking(false);
         newconnectioncb_(std::move(clientsock));      // 回调TcpServer::newconnection()。
     }
 

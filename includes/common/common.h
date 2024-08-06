@@ -9,11 +9,11 @@
 
 namespace cpptools::common
 {
-#ifdef defined(WIN32)
+#if defined(_WIN32) || defined(_WIN64)
 #define OS_WINDOWS
 #elif defined(__linux__)
 #define OS_LINUX
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) && defined(__MACH__)
 #define OS_MAC
 #endif
 

@@ -18,10 +18,10 @@ namespace cpptools::net
 
     int ServerSocket::accept(InetAddress &address)
     {
-        sockaddr_in peeraddr{};
-        socklen_t len = sizeof(peeraddr);
-        int client_fd = accept4(getFd(), (sockaddr *) &peeraddr, &len, SOCK_NONBLOCK);
-        address.setAddr(peeraddr);
+        sockaddr_in peerAddr{};
+        socklen_t len = sizeof(peerAddr);
+        int client_fd = ::accept(getFd(), (sockaddr *) &peerAddr, &len);
+        address.setAddr(peerAddr);
         return client_fd;
     }
 }
