@@ -23,27 +23,48 @@ namespace cpptools::net
 
     public:
         Socket() = default;
+
         ~Socket();
-        Socket(String host, uint16 port) : _host(std::move(host)), _port(port){};
+
+        Socket(String host, uint16 port) : _host(std::move(host)), _port(port)
+        {};
+
+        explicit Socket(int fd) : _fd(fd)
+        {}
+
         Socket(const Socket &other) = delete;
+
         Socket(Socket &&other) = delete;
+
         Socket &operator=(Socket &&other) = delete;
 
         void setHost(const String &host);
+
         [[nodiscard]] String getHost() const;
+
         void setPort(uint16 port);
+
         [[nodiscard]] uint16 getPort() const;
 
         int connect();
-        int connect(const String &host, uint16 port);
-        [[nodiscard]] int setBlocking(bool blocking) const;
-        [[nodiscard]] int setKeepalive(bool keepalive) const;
-        [[nodiscard]] int setReuseaddr(bool reuseaddr) const;
-        [[nodiscard]] int setReuseport(bool reuseport) const;
-        [[nodiscard]] int setTcpNoDelay(bool tcpNoDelay) const;
 
-        ssize_t send(char* data, uint32 length) const;
-        ssize_t receive(char* data, uint32 length) const;
+        int connect(const String &host, uint16 port);
+
+        int setBlocking(bool blocking) const;
+
+        int setKeepalive(bool keepalive) const;
+
+        int setReuseaddr(bool reuseaddr) const;
+
+        int setReuseport(bool reuseport) const;
+
+        int setTcpNoDelay(bool tcpNoDelay) const;
+
+        ssize_t send(char *data, uint32 length) const;
+
+        ssize_t receive(char *data, uint32 length) const;
+
+        [[nodiscard]] int getFd() const;
 
         void close();
     };

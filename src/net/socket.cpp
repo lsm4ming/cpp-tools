@@ -115,3 +115,8 @@ int cpptools::net::Socket::setTcpNoDelay(bool tcpNoDelay) const
     int optVal = tcpNoDelay ? 1 : 0;
     return ::setsockopt(this->_fd, IPPROTO_TCP, TCP_NODELAY, &optVal, sizeof(optVal));
 }
+
+int cpptools::net::Socket::getFd() const
+{
+    return this->_fd;
+}

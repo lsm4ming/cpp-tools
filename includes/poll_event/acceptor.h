@@ -5,8 +5,9 @@
 #include <unistd.h>
 #include <utility>
 #include "define.h"
-#include "net/socket.h"
+#include "net/server_socket.h"
 #include "net/inet_address.h"
+#include "channel.h"
 
 using namespace cpptools::common;
 using namespace cpptools::net;
@@ -17,13 +18,12 @@ namespace cpptools::pollEvent
     {
     private:
         EventLoop *loop_;               // Acceptor对应的事件循环，在构造函数中传入。
-        Socket servsock_;                // 服务端用于监听的socket，在构造函数中创建。
+        ServerSocket servsock_;                // 服务端用于监听的socket，在构造函数中创建。
         Channel acceptchannel_;    // Acceptor对应的channel，在构造函数中创建。
-        std::function<void(
-                std::unique_ptr<Socket>)> newconnectioncb_;   // 处理新客户端连接请求的回调函数，将指向TcpServer::newconnection()
+        std::function<void(std::unique_ptr<Socket>)> newconnectioncb_;   // 处理新客户端连接请求的回调函数
 
     public:
-        Acceptor(EventLoop *loop, const std::string &ip, const uint16_t port);
+        Acceptor(EventLoop *loop, const std::string &ip, uint16_t port);
 
         ~Acceptor();
 
