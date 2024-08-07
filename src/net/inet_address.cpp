@@ -9,7 +9,7 @@ namespace cpptools::net
         addr_.sin_addr.s_addr = inet_addr(ip.c_str());
     }
 
-    [[maybe_unused]] InetAddress::InetAddress(const sockaddr_in addr)
+    [[maybe_unused]] InetAddress::InetAddress(const sockaddr_in& addr)
     {
         addr_ = addr;
     }

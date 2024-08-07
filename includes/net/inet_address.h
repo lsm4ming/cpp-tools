@@ -17,7 +17,7 @@ namespace cpptools::net
 
         InetAddress(const String &ip, uint16_t port);
 
-        [[maybe_unused]] explicit InetAddress(sockaddr_in addr);
+        [[maybe_unused]] explicit InetAddress(const sockaddr_in& addr);
 
         ~InetAddress() = default;
 

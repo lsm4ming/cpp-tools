@@ -12,7 +12,7 @@ namespace cpptools::net
     class ChannelHandler
     {
     public:
-        virtual void onAccept(const Channel &channel) = 0;
+        virtual int onAccept(const Channel &channel) = 0;
 
         virtual void onRead(const Channel &channel) = 0;
 
@@ -58,7 +58,7 @@ namespace cpptools::net
 
         virtual void onClose(const PollConn &conn) = 0;
 
-        void onAccept(const Channel &channel) override
+        int onAccept(const Channel &channel) override
         {};
 
         void onRead(const Channel &channel) override
@@ -87,7 +87,7 @@ namespace cpptools::net
 
         explicit HandlerWrapper(ConnectHandler &&handler);
 
-        void onAccept(const Channel &channel) override;
+        int onAccept(const Channel &channel) override;
 
         void onRead(const Channel &channel) override;
 

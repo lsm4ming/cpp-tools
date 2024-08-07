@@ -14,16 +14,28 @@ namespace cpptools::net
         uint32_t events{};
         epoll_data_t data{};
 
-    protected:
-        int _fd{};
-
     public:
         Channel() = default;
 
         ~Channel() = default;
 
+        Channel(int fd, uint32_t events, epoll_data_t data) : events(events), data(data)
+        {
+            this->data.fd = fd;
+        };
+
         void enableReading();
 
-        int getFd() const;
+        void enableWriting();
+
+        void disableAll();
+
+        void enableEt();
+
+        void enableAll();
+
+        void enableNoBlocking() const;
+
+        [[nodiscard]] int getFd() const;
     };
 }

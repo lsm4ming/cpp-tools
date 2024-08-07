@@ -9,6 +9,7 @@
 #include "http/httpclient.h"
 #include "net/poll_epoll.h"
 #include "net/server_socket.h"
+#include "net/poll_channel.h"
 
 void ioTest()
 {
@@ -115,6 +116,7 @@ class chatHandler : public cpptools::net::ConnectHandler
 public:
     void onAccept(const cpptools::net::PollConn &conn) override
     {
+        std::cout << "连接加入..." << std::endl;
         connSet.insert(&conn);
     }
 
@@ -131,6 +133,7 @@ public:
                 this->onClose(conn);
                 break;
             }
+            buff[n] = '\0';
             std::cout << buff << std::endl;
             for (auto c: connSet)
             {
@@ -151,11 +154,13 @@ public:
     void onClose(const cpptools::net::PollConn &conn) override
     {
         connSet.erase(&conn);
+        std::cout << "连接退出" << std::endl;
     }
 };
 
 void pollTest()
 {
+    std::cout << "pollTest" << std::endl;
     volatile std::atomic_bool running = true;
     cpptools::net::ServerSocket serverSocket("127.0.0.1", 9999);
     serverSocket.setBlocking(false);
@@ -164,8 +169,9 @@ void pollTest()
     serverSocket.setReuseport(true);
     serverSocket.setKeepalive(true);
 
-    auto wrapper = cpptools::net::HandlerWrapper::makeWrapper(chatHandler{});
-    auto poll = cpptools::net::createPollEvent(wrapper.release());
+    auto wrapper = cpptools::net::HandlerWrapper::makeWrapper(new chatHandler);
+
+    auto poll = cpptools::net::createPollEvent(wrapper.get());
     if (serverSocket.bind() < 0)
     {
         throw std::runtime_error("bind error");

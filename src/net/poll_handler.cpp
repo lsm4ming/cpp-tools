@@ -9,7 +9,7 @@ namespace cpptools::net
         this->customHandler = handler;
     }
 
-    void HandlerWrapper::onAccept(const Channel &channel)
+    int HandlerWrapper::onAccept(const Channel &channel)
     {
         struct sockaddr_in client_addr{};
         socklen_t client;
@@ -20,8 +20,9 @@ namespace cpptools::net
         }
         InetAddress address(client_addr);
         auto conn = std::make_shared<PollConn>(client_fd, address);
-        this->connMap[client_fd] = conn;
+        this->connMap.insert({client_fd, conn});
         this->customHandler->onAccept(*conn);
+        return client_fd;
     }
 
     void HandlerWrapper::onRead(const Channel &channel)
