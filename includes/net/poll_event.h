@@ -1,12 +1,16 @@
 #pragma once
 
 #include "common/common.h"
-#include "poll_channel.h"
+#include "poll_handler.h"
 
 using namespace cpptools::common;
 
 namespace cpptools::net
 {
+    class Channel;
+
+    class ChannelHandler;
+
     class PollEvent
     {
     public:
@@ -30,7 +34,7 @@ namespace cpptools::net
          * @param timeout
          * @return
          */
-        virtual Vector<Channel *> poll(int timeout = -1) = 0;
+        virtual int pollWait(int timeout) = 0;
 
         /**
          * 更新Channel
@@ -53,4 +57,8 @@ namespace cpptools::net
          */
         virtual int removeChannel(Channel *ch) = 0;
     };
+
+    extern UniquePtr<PollEvent> createPollEvent(ChannelHandler *handler);
+
+    extern UniquePtr<PollEvent> createPollEvent(UniquePtr<ChannelHandler> handler);
 }

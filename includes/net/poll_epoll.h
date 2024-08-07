@@ -1,0 +1,38 @@
+#pragma once
+
+#include "common/common.h"
+#include "poll_event.h"
+#include "poll.h"
+
+#ifdef OS_LINUX
+
+#include <sys/epoll.h>
+
+namespace cpptools::net
+{
+    constexpr const size_t MaxEvents = 1024;
+
+    class PollEpoll : public PollEvent
+    {
+    private:
+        int socket_fd{-1};
+        int epoll_fd{-1};
+        ChannelHandler *_handler;
+
+    public:
+        explicit PollEpoll(ChannelHandler *handler);
+
+        int makeup(int fd) override;
+
+        void close() override;
+
+        int pollWait(int timeout) override;
+
+        int updateChannel(Channel *ch) override;
+
+        int addChannel(Channel *ch) override;
+
+        int removeChannel(Channel *ch) override;
+    };
+}
+#endif

@@ -6,6 +6,9 @@
 #include <map>
 #include <memory>
 #include <sstream>
+#include <thread>
+#include <functional>
+#include <unordered_set>
 
 namespace cpptools::common
 {
@@ -52,4 +55,12 @@ namespace cpptools::common
     using UniquePtr = std::unique_ptr<T>;
 
     using OsStringStream = std::ostringstream;
+
+    using Thread = std::thread;
+
+    template<typename T>
+    using Function = std::function<T>;
+
+    template<typename T>
+    using HashSet = std::unordered_set<T>;
 }

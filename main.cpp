@@ -7,7 +7,8 @@
 #include "net/datagram.h"
 #include "json/jsonparse.h"
 #include "http/httpclient.h"
-#include "poll/poll.h"
+#include "net/poll_epoll.h"
+#include "net/server_socket.h"
 
 void ioTest()
 {
@@ -104,10 +105,84 @@ void httpClientTest()
     std::cout << response.getBody() << std::endl;
 }
 
+/**
+ * 实现一个群聊
+ */
+class chatHandler : public cpptools::net::ConnectHandler
+{
+    HashSet<const cpptools::net::PollConn *> connSet;
+
+public:
+    void onAccept(const cpptools::net::PollConn &conn) override
+    {
+        connSet.insert(&conn);
+    }
+
+    void onRead(const cpptools::net::PollConn &conn) override
+    {
+        // 读取所有的内容
+        while (true)
+        {
+            char buff[1024];
+            auto n = conn.read(buff, sizeof(buff));
+            // 连接是否退出
+            if (n == 0)
+            {
+                this->onClose(conn);
+                break;
+            }
+            std::cout << buff << std::endl;
+            for (auto c: connSet)
+            {
+                c->write(buff, n);
+            }
+            if (n < 1024)
+            {
+                break;
+            }
+        }
+    }
+
+    void onWrite(const cpptools::net::PollConn &conn) override
+    {
+        std::cout << "onWrite" << std::endl;
+    }
+
+    void onClose(const cpptools::net::PollConn &conn) override
+    {
+        connSet.erase(&conn);
+    }
+};
+
 void pollTest()
 {
-    cpptools::poll::PollEvent poll;
-    poll.run();
+    volatile std::atomic_bool running = true;
+    cpptools::net::ServerSocket serverSocket("127.0.0.1", 9999);
+    serverSocket.setBlocking(false);
+    serverSocket.setReuseaddr(true);
+    serverSocket.setTcpNoDelay(true);
+    serverSocket.setReuseport(true);
+    serverSocket.setKeepalive(true);
+
+    auto wrapper = cpptools::net::HandlerWrapper::makeWrapper(chatHandler{});
+    auto poll = cpptools::net::createPollEvent(wrapper.release());
+    if (serverSocket.bind() < 0)
+    {
+        throw std::runtime_error("bind error");
+    }
+    if (serverSocket.listen() < 0)
+    {
+        throw std::runtime_error("listen error");
+    }
+    if (poll->makeup(serverSocket.getFd()) < 0)
+    {
+        throw std::runtime_error("makeup error");
+    }
+
+    while (running)
+    {
+        poll->pollWait(1000);
+    }
 }
 
 int main()

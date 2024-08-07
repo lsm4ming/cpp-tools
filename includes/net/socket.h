@@ -15,11 +15,13 @@ namespace cpptools::net
 {
     class Socket
     {
-    private:
+    protected:
         int _fd{-1};
-        bool _connected{false};
         String _host;
         uint16 _port{0};
+
+    private:
+        bool _connected{false};
 
     public:
         Socket() = default;

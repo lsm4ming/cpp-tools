@@ -8,9 +8,7 @@ namespace cpptools::net
     class ServerSocket : public Socket
     {
     public:
-        ServerSocket() = default;
-
-        ServerSocket(String host, uint16 port) : Socket(std::move(host), port){};
+        ServerSocket(String host, uint16 port);
 
         int bind();
 

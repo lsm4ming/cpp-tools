@@ -1,7 +1,18 @@
 #include "net/server_socket.h"
 
+#include <utility>
+
 namespace cpptools::net
 {
+    ServerSocket::ServerSocket(String host, uint16 port) : Socket(std::move(host), port)
+    {
+        this->_fd = socket(AF_INET, SOCK_STREAM, 0);
+        if (this->_fd < 0)
+        {
+            throw std::runtime_error("socket error");
+        }
+    }
+
     int ServerSocket::bind()
     {
         struct sockaddr_in addr{};

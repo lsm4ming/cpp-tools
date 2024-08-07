@@ -1,5 +1,7 @@
 #include "poll_event/channel.h"
 
+#include <utility>
+
 namespace cpptools::pollEvent
 {
 
@@ -93,22 +95,22 @@ namespace cpptools::pollEvent
 
     void Channel::setreadcallback(std::function<void()> fn)
     {
-        readcallback_ = fn;
+        readcallback_ = std::move(fn);
     }
 
     void Channel::setclosecallback(std::function<void()> fn)
     {
-        closecallback_ = fn;
+        closecallback_ = std::move(fn);
     }
 
     void Channel::seterrorcallback(std::function<void()> fn)
     {
-        errorcallback_ = fn;
+        errorcallback_ = std::move(fn);
     }
 
     void Channel::setwritecallback(std::function<void()> fn)
     {
-        writecallback_ = fn;
+        writecallback_ = std::move(fn);
     }
 }
 

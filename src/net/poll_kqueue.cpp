@@ -1,16 +1,12 @@
 #include "net/poll_kqueue.h"
 
+#ifdef OS_MAC
 namespace cpptools::net
 {
     int PollKqueue::makeup(int fd)
     {
         this->socket_fd = fd;
-        if ((this->kqueue_fd = kqueue()) == -1)
-        {
-            return -1;
-        }
-        // return updateEvents(this->socket_fd, kReadEvent, false);
-        return 0;
+        return (this->kqueue_fd = kqueue());
     }
 
     void PollKqueue::close()
@@ -37,3 +33,4 @@ namespace cpptools::net
         return 0;
     }
 }
+#endif
