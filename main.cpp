@@ -7,8 +7,7 @@
 #include "net/datagram.h"
 #include "json/jsonparse.h"
 #include "http/httpclient.h"
-#include "net/poll_epoll.h"
-#include "net/server_socket.h"
+#include "http/httpserver.h"
 #include "net/poll_channel.h"
 
 void ioTest()
@@ -191,6 +190,20 @@ void pollTest()
     }
 }
 
+void httpServerTest()
+{
+    cpptools::http::HttpServer server("127.0.0.1", 9999);
+    server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/",
+                    [](const cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
+                    {
+                        auto t = req.getQuery("name");
+                        resp.addHeader("Content-Type", "text/plain");
+                        auto result = "hello: " + t;
+                        resp.write(result.data(), result.length());
+                    });
+    server.start();
+}
+
 int main()
 {
     // ioTest();
@@ -198,6 +211,7 @@ int main()
     netTest();
     jsonTest();
     httpClientTest();
-    pollTest();
+    // pollTest();
+    httpServerTest();
     return 0;
 }

@@ -19,14 +19,18 @@ namespace cpptools::http
     class HttpServer;
 
     inline std::regex url_regex(R"((https?)://([^/\r\n]+)(/[^\r\n?]*)?(\?[^#\r\n]*)?)");
-    inline std::regex resp_line_regex;
+
+    inline std::regex request_line_regex(R"(([^ ]+) ([^ ]+) ([^ ]+))");
 
     constexpr const int BUFFER_SIZE = 4096;
     constexpr const char *HTTP_VERSION = "HTTP/1.1";
     constexpr const char *WRAP = "\r\n";
+    constexpr const char *HEADER_END = "\r\n\r\n";
     constexpr const char *EMPTY = " ";
+    constexpr const char *BAD_REQUEST = "HTTP/1.1 400 Bad Request\r\n\r\n";
 
     using Header = SortMap <String, Vector<String>>;
+    using FormData = SortMap <String, Vector<String>>;
 
     enum HttpStatus
     {
@@ -155,18 +159,30 @@ namespace cpptools::http
             };
 
     inline HashMap <HttpMethod, String> methodMap = {
-            {HTTP_GET, "GET"},
-            {HTTP_POST, "POST"},
-            {HTTP_HEAD, "HEAD"},
-            {HTTP_PUT, "PUT"},
-            {HTTP_DELETE, "DELETE"},
-            {HTTP_PATCH, "PATCH"},
+            {HTTP_GET,     "GET"},
+            {HTTP_POST,    "POST"},
+            {HTTP_HEAD,    "HEAD"},
+            {HTTP_PUT,     "PUT"},
+            {HTTP_DELETE,  "DELETE"},
+            {HTTP_PATCH,   "PATCH"},
             {HTTP_OPTIONS, "OPTIONS"},
     };
 
     static String methodToString(HttpMethod method)
     {
         return methodMap[method];
+    }
+
+    static HttpMethod stringToMethod(const String &method)
+    {
+        for (const auto &pair: methodMap)
+        {
+            if (pair.second == method)
+            {
+                return pair.first;
+            }
+        }
+        throw HttpStatusException(HTTP_BAD_REQUEST);
     }
 
     static String statusToString(HttpStatus status)

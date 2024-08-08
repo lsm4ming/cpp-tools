@@ -42,9 +42,11 @@ namespace cpptools::net
             return this->clientAddress;
         }
 
-        size_t read(void *buf, size_t len) const;
+        size_t read(char *buf, size_t len) const;
 
         size_t write(const void *buf, size_t len) const;
+
+        void close() const;
     };
 
     class ConnectHandler : public ChannelHandler
@@ -59,7 +61,7 @@ namespace cpptools::net
         virtual void onClose(const PollConn &conn) = 0;
 
         int onAccept(const Channel &channel) override
-        {};
+        { return 0; };
 
         void onRead(const Channel &channel) override
         {};

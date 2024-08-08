@@ -97,7 +97,7 @@ namespace cpptools::http
                 this->_path = "/";
             }
 
-            for (auto &item: this->parseQuery(this->_queryRaw))
+            for (auto &item: cpptools::http::HttpRequest::parseQuery(this->_queryRaw))
             {
                 this->addQuery(item.first, item.second);
             }
@@ -254,9 +254,7 @@ namespace cpptools::http
 
     void HttpRequest::set_socket_timeout(int fd, int seconds)
     {
-        struct timeval timeout
-                {
-                };
+        struct timeval timeout{};
         timeout.tv_sec = seconds;
         timeout.tv_usec = 0;
         setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char *) &timeout, sizeof(timeout));
