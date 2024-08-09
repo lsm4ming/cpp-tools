@@ -1,4 +1,3 @@
-#include <cstdarg>
 #include "log/log.h"
 
 namespace cpptools::log
@@ -113,7 +112,9 @@ namespace cpptools::log
         // "%Y-%m-%d"
         std::strftime(buf, sizeof(buf), this->_filename.c_str(), std::localtime(&now));
         // {level} => 等级
-        return std::string(buf) + "_error.log";
+        String result = std::string(buf) + ".log";
+        cpptools::utils::replaceAll(result, "{level}", levelString(level));
+        return result;
     }
 
     void Logger::checkNewFile(LogLevel level)

@@ -211,6 +211,7 @@ int main()
     cpptools::log::LOG_MODE(cpptools::log::FILE);
     cpptools::log::LOG_FILENAME("我的日志%Y-%m-%d{level}.log");
 
+    cpptools::log::LOG_ERROR("");
     // ioTest();
     timeTest();
     netTest();

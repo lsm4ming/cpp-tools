@@ -2,7 +2,9 @@
 
 #include <fstream>
 #include <iostream>
+#include <cstdarg>
 #include "common/common.h"
+#include "utils/string.h"
 
 using namespace cpptools::common;
 
@@ -124,11 +126,11 @@ namespace cpptools::log
 #define LOG(level, format, ...) \
     Logger::getInstance().log(level, __FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
 #define LOG_DEBUG(format, ...) \
-    Logger::getInstance()::debug(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
+    Logger::getInstance().debug(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
 #define LOG_INFO(format, ...) \
-    Logger::getInstance()::info(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
+    Logger::getInstance().info(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
 #define LOG_WARNING(format, ...) \
-    Logger::getInstance()::warning(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
+    Logger::getInstance().warning(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
 #define LOG_ERROR(format, ...) \
-    Logger::getInstance()::error(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
+    Logger::getInstance().error(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
 }
