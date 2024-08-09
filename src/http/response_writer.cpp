@@ -29,6 +29,6 @@ namespace cpptools::http
 
     size_t HttpResponseWriter::write(char *data, size_t length) const
     {
-        return ::write(this->_fd, data, length);
+        return _write(data, length);
     }
 }

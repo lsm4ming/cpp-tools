@@ -48,11 +48,6 @@ namespace cpptools::http
         return result;
     }
 
-    std::pair<Node *, SortMap<String, String>> getRoute(const String &method, const String &path)
-    {
-
-    }
-
     std::pair<Node *, SortMap<String, String>>
     cpptools::http::HttpRouter::getRoute(const String &method, const String &path)
     {

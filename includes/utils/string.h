@@ -20,4 +20,46 @@ namespace cpptools::utils
         ret.push_back(str.substr(pos));
         return ret;
     }
+
+
+    static int indexOf(const String &buff, const String &key)
+    {
+        size_t index = buff.find(key);
+        return index == std::string::npos ? -1 : static_cast<int>(index);
+    }
+
+    static String urlDecode(const String &url)
+    {
+        String result;
+        for (size_t i = 0; i < url.length(); i++)
+        {
+            if (url[i] == '%')
+            {
+                result += url[i + 1];
+                result += url[i + 2];
+                i += 2;
+            }
+            else
+            {
+                result += url[i];
+            }
+        }
+        return result;
+    }
+
+    static String urlEncode(const String &url)
+    {
+        String result;
+        for (size_t i = 0; i < url.length(); i++)
+        {
+            if (url[i] == ' ')
+            {
+                result += "%20";
+            } else
+            {
+                result += url[i];
+            }
+        }
+        return result;
+    }
 }

@@ -55,15 +55,28 @@ namespace cpptools::http
                               handler);
     }
 
+    void HttpServer::dispatch(Request &request, HttpResponseWriter &response)
+    {
+        String method = methodToString(request.method);
+        RouteHandler handler;
+        auto [node, params] = this->router.getRoute(method, request.url);
+        if (node == nullptr)
+        {
+            response.setStatus(HttpStatus::HTTP_NOT_FOUND);
+            return;
+        }
+        request.setParams(params);
+        this->router.getHandler(method, request.url)(request, response);
+    }
+
+    int HttpServer::staticDispatch(const Request &request, HttpResponseWriter &response)
+    {
+        return 0;
+    }
+
     void HttpProtocolHandler::onAccept(const PollConn &conn)
     {
         // nop
-    }
-
-    int indexOf(const String &buff, const String &key)
-    {
-        size_t index = buff.find(key);
-        return index == std::string::npos ? -1 : static_cast<int>(index);
     }
 
     void badRequest(const PollConn &conn)
@@ -82,7 +95,7 @@ namespace cpptools::http
             size_t len = conn.read(data, BUFFER_SIZE);
             buff.insert(buff.end(), data, data + len);
             // 是否存在\r\n\r\n
-            if (buff.size() >= 4 && (index = indexOf(String(data), HEADER_END)) != -1)
+            if (buff.size() >= 4 && (index = cpptools::utils::indexOf(String(data), HEADER_END)) != -1)
             {
                 break;
             }
@@ -96,25 +109,19 @@ namespace cpptools::http
         // 从index开始，后面都是body
         String body = String(buff.begin() + index + 4, buff.end());
         String header = String(buff.begin(), buff.begin() + index);
-
-        // 解析请求行
-        int lineIndex = indexOf(header, "\r\n");
-        if (lineIndex == -1)
+        Function<size_t(char *, size_t)> readFun = [ObjectPtr = &conn](auto &&PH1, auto &&PH2)
+        { return ObjectPtr->read(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); };
+        RequestParse parse(header);
+        Request request(readFun);
+        if (parse.parse(request) == -1)
         {
             badRequest(conn);
             return;
         }
-        String line = header.substr(0, lineIndex);
-        // 根据空格分隔字符串
-        StringList line_match_result = cpptools::utils::split(line, " ");
-        HttpMethod method = stringToMethod(line_match_result[0]);
-        String url = line_match_result[1];
-        String version = line_match_result[2];
-
-        Function<size_t(char *, size_t)> fun = [ObjectPtr = &conn](auto &&PH1, auto &&PH2)
-        { return ObjectPtr->read(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); };
-        Request request(fun, method, url, version);
-        // this->pServer->router.getHandler(conn, header, body);
+        Function<size_t(char *, size_t)> writerFun = [ObjectPtr = &conn](auto &&PH1, auto &&PH2)
+        { return ObjectPtr->write(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); };
+        HttpResponseWriter responseWriter(writerFun);
+        this->pServer->dispatch(request, responseWriter);
         conn.close();
     }
 

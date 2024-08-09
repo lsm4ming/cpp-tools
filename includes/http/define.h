@@ -18,6 +18,8 @@ namespace cpptools::http
 
     class HttpServer;
 
+    class Request;
+
     inline std::regex url_regex(R"((https?)://([^/\r\n]+)(/[^\r\n?]*)?(\?[^#\r\n]*)?)");
 
     inline std::regex request_line_regex(R"(([^ ]+) ([^ ]+) ([^ ]+))");
@@ -28,6 +30,15 @@ namespace cpptools::http
     constexpr const char *HEADER_END = "\r\n\r\n";
     constexpr const char *EMPTY = " ";
     constexpr const char *BAD_REQUEST = "HTTP/1.1 400 Bad Request\r\n\r\n";
+    constexpr const char *SERVER = "Server: cpptools\r\n";
+    // ?
+    constexpr const char *QUESTION_MARK = "?";
+    // &
+    constexpr const char *AMP = "&";
+    // =
+    constexpr const char *EQUAL = "=";
+    // :
+    constexpr const char *COLON = ":";
 
     using Header = SortMap <String, Vector<String>>;
     using FormData = SortMap <String, Vector<String>>;

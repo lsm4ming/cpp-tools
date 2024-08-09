@@ -6,7 +6,7 @@
 #include "net/server_socket.h"
 #include "http_router.h"
 #include "define.h"
-#include "utils/string.h"
+#include "request_parse.h"
 
 using namespace cpptools::common;
 using namespace cpptools::net;
@@ -42,6 +42,11 @@ namespace cpptools::http
         String _staticDir;
         volatile std::atomic_bool running{false};
         HttpRouter router;
+
+    private:
+        void dispatch(Request &request, HttpResponseWriter &response);
+
+        static int staticDispatch(const Request &request, HttpResponseWriter &response);
 
     public:
         explicit HttpServer() = default;

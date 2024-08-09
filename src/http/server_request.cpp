@@ -1,9 +1,11 @@
 #include "http/server_request.h"
 
+#include <utility>
+
 namespace cpptools::http
 {
 
-    String Request::getParams(const String &key) const
+    String Request::getParam(const String &key) const
     {
         return params.at(key);
     }
@@ -20,7 +22,7 @@ namespace cpptools::http
 
     StringList Request::getQuerys(const String &key) const
     {
-        return query.at(key);
+        return _query.at(key);
     }
 
     String Request::getHeader(const String &key) const
@@ -35,6 +37,31 @@ namespace cpptools::http
 
     StringList Request::getHeaders(const String &key) const
     {
-        return header.at(key);
+        return _header.at(key);
+    }
+
+    Header Request::getHeader() const
+    {
+        return _header;
+    }
+
+    Header Request::getQuery() const
+    {
+        return this->_query;
+    }
+
+    void Request::setQuery(Header query)
+    {
+        this->_query = std::move(query);
+    }
+
+    void Request::setHeader(Header query)
+    {
+        this->_header = std::move(query);
+    }
+
+    void Request::setParams(SortMap<String, String> params)
+    {
+        this->params = std::move(params);
     }
 }

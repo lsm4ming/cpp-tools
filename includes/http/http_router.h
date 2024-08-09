@@ -20,12 +20,11 @@ namespace cpptools::http
         static Vector<String> parsePattern(const String &pattern);
 
         static String join(const Vector<String> &parts, size_t start, const String &delimiter);
-
-        std::pair<Node *, SortMap<String, String>> getRoute(const String &method, const String &path);
-
     public:
         void addRoute(const String &method, const String &path, const RouteHandler &handler);
 
         RouteHandler getHandler(const String &method, const String &pattern) const;
+
+        std::pair<Node *, SortMap<String, String>> getRoute(const String &method, const String &path);
     };
 }

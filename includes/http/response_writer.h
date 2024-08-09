@@ -10,12 +10,15 @@ namespace cpptools::http
     class HttpResponseWriter
     {
     private:
-        int _fd{-1};
         HttpStatus _status{HttpStatus::HTTP_OK};
         Header _headers;
+        Function<size_t(char *, size_t)> _write;
 
     public:
         explicit HttpResponseWriter() = default;
+
+        explicit HttpResponseWriter(Function<size_t(char *, size_t)> write) : _write(std::move(write))
+        {}
 
         void setStatus(HttpStatus status);
 
