@@ -3,8 +3,6 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-
-#include <utility>
 #include "common/common.h"
 
 using namespace cpptools::common;

@@ -13,24 +13,24 @@ namespace cpptools::concurrency
     class FixedQuantityThreadPool : protected ThreadPool
     {
     private:
-        Vector <Thread> threads_;                          // 线程池中的线程。
-        std::queue<Function < void()>> taskqueue_;    // 任务队列。
-        std::mutex mutex_;                                                  // 任务队列同步的互斥锁。
-        std::condition_variable condition_;                         // 任务队列同步的条件变量。
+        Vector<Thread> _threads;
+        std::queue<Function<void()>> _taskQueue;
+        std::mutex _mutex;
+        std::condition_variable _condition;
 
     public:
-        FixedQuantityThreadPool(size_t threadNum, const std::string& name);
+        FixedQuantityThreadPool(size_t threadNum, const std::string &name);
 
         // 把任务添加到队列中。
-        void addTask(const Function<void()> &task);
+        void addTask(const Function<void()> &task) override;
 
         // 获取线程池的大小。
-        [[nodiscard]] size_t size() const;
+        [[nodiscard]] size_t size() const override;
 
         // 停止线程。
-        void shutdown();
+        void shutdown() override;
 
         // 在析构函数中将停止线程。
-        ~FixedQuantityThreadPool();
+        ~FixedQuantityThreadPool() override;
     };
 }

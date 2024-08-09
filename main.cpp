@@ -9,6 +9,7 @@
 #include "http/httpclient.h"
 #include "http/httpserver.h"
 #include "net/poll_channel.h"
+#include "log/log.h"
 
 void ioTest()
 {
@@ -206,6 +207,10 @@ void httpServerTest()
 
 int main()
 {
+    cpptools::log::LOG_LEVEL(cpptools::log::DEBUG);
+    cpptools::log::LOG_MODE(cpptools::log::FILE);
+    cpptools::log::LOG_FILENAME("我的日志%Y-%m-%d{level}.log");
+
     // ioTest();
     timeTest();
     netTest();

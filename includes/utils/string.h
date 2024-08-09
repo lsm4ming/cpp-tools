@@ -38,8 +38,7 @@ namespace cpptools::utils
                 result += url[i + 1];
                 result += url[i + 2];
                 i += 2;
-            }
-            else
+            } else
             {
                 result += url[i];
             }
@@ -61,5 +60,21 @@ namespace cpptools::utils
             }
         }
         return result;
+    }
+
+    static void replace(String &str, const String &oldSubstr, const String &newSubstr, int n)
+    {
+        size_t pos = 0;
+        int i = 0;
+        while ((pos = str.find(oldSubstr, pos)) != String::npos && n >0 && i++ < n)
+        {
+            str.replace(pos, oldSubstr.length(), newSubstr);
+            pos += newSubstr.length();
+        }
+    }
+
+    static void replaceAll(std::string &str, const std::string &oldSubstr, const std::string &newSubstr)
+    {
+        replace(str, oldSubstr, newSubstr, -1);
     }
 }
