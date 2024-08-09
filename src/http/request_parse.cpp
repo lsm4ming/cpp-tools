@@ -33,15 +33,15 @@ namespace cpptools::http
             return -1;
         }
         request.method = stringToMethod(line_match_result[0]);
-        request.url = line_match_result[1];
+        request.path = line_match_result[1];
         request.version = line_match_result[2];
 
         // 解析query参数
-        if (request.url.find(QUESTION_MARK) != String::npos)
+        if (request.path.find(QUESTION_MARK) != String::npos)
         {
             Header query;
-            request.queryRow = request.url.substr(request.url.find(QUESTION_MARK) + 1);
-            request.url = request.url.substr(0, request.url.find(QUESTION_MARK));
+            request.queryRow = request.path.substr(request.path.find(QUESTION_MARK) + 1);
+            request.path = request.path.substr(0, request.path.find(QUESTION_MARK));
             StringList querys = cpptools::utils::split(request.queryRow, AMP);
             for (auto &item: querys)
             {

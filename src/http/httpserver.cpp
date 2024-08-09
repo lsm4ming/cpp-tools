@@ -55,23 +55,55 @@ namespace cpptools::http
                               handler);
     }
 
-    void HttpServer::dispatch(Request &request, HttpResponseWriter &response)
+    void HttpServer::dispatch(int fd, Request &request, HttpResponseWriter &response)
     {
         String method = methodToString(request.method);
         RouteHandler handler;
-        auto [node, params] = this->router.getRoute(method, request.url);
-        if (node == nullptr)
+        auto [node, params] = this->router.getRoute(method, request.path);
+        if (node == nullptr && !staticDispatch(fd, request, response))
         {
             response.setStatus(HttpStatus::HTTP_NOT_FOUND);
             return;
         }
         request.setParams(params);
-        this->router.getHandler(method, request.url)(request, response);
+        this->router.getHandler(method, request.path)(request, response);
     }
 
-    int HttpServer::staticDispatch(const Request &request, HttpResponseWriter &response)
+    String eductionContentType(const String &path)
     {
-        return 0;
+        size_t pos = path.find_last_of('.');
+        HashMap<String, String>::iterator iter;
+        if (pos == String::npos ||
+            (iter = CONTENT_TYPE_MAP.find(path.substr(pos + 1))) == CONTENT_TYPE_MAP.end())
+        {
+            return "application/octet-stream";
+        }
+        return iter->second;
+    }
+
+    bool HttpServer::staticDispatch(int fd, Request &request, HttpResponseWriter &response)
+    {
+        if (request.method != HttpMethod::HTTP_GET)
+        {
+            return false;
+        }
+        std::string path = request.path;
+        if (!path.empty() && path[0] != '/')
+        {
+            path = '/' + path;
+        }
+        path = this->_staticDir + path;
+
+        struct stat fileStat{};
+        int ret = stat(path.c_str(), &fileStat);
+        if (ret < 0 || S_ISDIR(fileStat.st_mode))
+        {
+            return false;
+        }
+        int static_fd = open(path.c_str(), O_RDONLY);
+        response.sendfile(fd, eductionContentType(path), static_fd, fileStat.st_size);
+        close(static_fd);
+        return true;
     }
 
     void HttpProtocolHandler::onAccept(const PollConn &conn)
@@ -120,8 +152,11 @@ namespace cpptools::http
         }
         Function<size_t(char *, size_t)> writerFun = [ObjectPtr = &conn](auto &&PH1, auto &&PH2)
         { return ObjectPtr->write(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); };
-        HttpResponseWriter responseWriter(writerFun);
-        this->pServer->dispatch(request, responseWriter);
+        {
+            HttpResponseWriter responseWriter(writerFun);
+            this->pServer->dispatch(conn.getFd(), request, responseWriter);
+        }
+        conn.flush();
         conn.close();
     }
 

@@ -7,7 +7,12 @@ namespace cpptools::http
 
     String Request::getParam(const String &key) const
     {
-        return params.at(key);
+        auto it = _params.find(key);
+        if (it != _params.end())
+        {
+            return it->second;
+        }
+        return "";
     }
 
     String Request::getQuery(const String &key) const
@@ -22,7 +27,12 @@ namespace cpptools::http
 
     StringList Request::getQuerys(const String &key) const
     {
-        return _query.at(key);
+        auto it = _query.find(key);
+        if (it != _query.end())
+        {
+            return it->second;
+        }
+        return {};
     }
 
     String Request::getHeader(const String &key) const
@@ -37,7 +47,12 @@ namespace cpptools::http
 
     StringList Request::getHeaders(const String &key) const
     {
-        return _header.at(key);
+        auto it = _header.find(key);
+        if (it != _header.end())
+        {
+            return it->second;
+        }
+        return {};
     }
 
     Header Request::getHeader() const
@@ -62,6 +77,6 @@ namespace cpptools::http
 
     void Request::setParams(SortMap<String, String> params)
     {
-        this->params = std::move(params);
+        this->_params = std::move(params);
     }
 }

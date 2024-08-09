@@ -77,4 +77,9 @@ namespace cpptools::net
     {
         ::close(this->_fd);
     }
+
+    void PollConn::flush() const
+    {
+        ::fsync(this->_fd);
+    }
 }

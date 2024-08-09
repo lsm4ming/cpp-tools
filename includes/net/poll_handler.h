@@ -25,8 +25,6 @@ namespace cpptools::net
 
     class PollConn
     {
-        friend class ConnPollHandler;
-
     private:
         const InetAddress clientAddress;
         int _fd;
@@ -47,6 +45,13 @@ namespace cpptools::net
         size_t write(const void *buf, size_t len) const;
 
         void close() const;
+
+        void flush() const;
+
+        int getFd() const
+        {
+            return this->_fd;
+        }
     };
 
     class ConnectHandler : public ChannelHandler

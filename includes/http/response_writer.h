@@ -1,5 +1,8 @@
 #pragma once
 
+#include <sstream>
+#include <cstring>
+#include <sys/sendfile.h>
 #include "common/common.h"
 #include "define.h"
 
@@ -13,12 +16,16 @@ namespace cpptools::http
         HttpStatus _status{HttpStatus::HTTP_OK};
         Header _headers;
         Function<size_t(char *, size_t)> _write;
+        std::stringstream _buf{};
+        bool _done{false};
 
     public:
         explicit HttpResponseWriter() = default;
 
         explicit HttpResponseWriter(Function<size_t(char *, size_t)> write) : _write(std::move(write))
         {}
+
+        ~HttpResponseWriter();
 
         void setStatus(HttpStatus status);
 
@@ -30,6 +37,19 @@ namespace cpptools::http
 
         void setContentType(const String &value);
 
-        size_t write(char *data, size_t length) const;
+        void write(char *data, size_t length);
+
+        void write(const String &data);
+
+        off_t sendfile(int fd, const std::string &contentType, int file_fd, size_t count);
+
+    private:
+        void writeRespLine() const;
+
+        void writeRespHeader() const;
+
+        void writeWithKV(const String &key, const String &value) const;
+
+        void writeRespBody() const;
     };
 }

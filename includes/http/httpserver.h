@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstring>
+#include <sys/stat.h>
 #include "common/common.h"
 #include "net/poll_event.h"
 #include "net/server_socket.h"
@@ -44,9 +45,9 @@ namespace cpptools::http
         HttpRouter router;
 
     private:
-        void dispatch(Request &request, HttpResponseWriter &response);
+        void dispatch(int fd, Request &request, HttpResponseWriter &response);
 
-        static int staticDispatch(const Request &request, HttpResponseWriter &response);
+        bool staticDispatch(int fd, Request &request, HttpResponseWriter &response);
 
     public:
         explicit HttpServer() = default;

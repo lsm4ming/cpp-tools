@@ -200,4 +200,26 @@ namespace cpptools::http
     {
         return statusMap[status];
     }
+
+    inline HashMap<String, String> CONTENT_TYPE_MAP = {
+            {"txt",  "text/plain"},
+            {"html", "text/html"},
+            {"htm",  "text/html"},
+            {"css",  "text/css"},
+            {"js",   "application/javascript"},
+            {"json", "application/json"},
+            {"jpg",  "image/jpeg"},
+            {"jpeg", "image/jpeg"},
+            {"png",  "image/png"},
+            {"gif",  "image/gif"},
+            {"ico",  "image/x-icon"},
+            {"mp3",  "audio/mp3"},
+            {"mp4",  "video/mpeg4"},
+            {"mpeg", "video/mpeg"},
+            {"pdf",  "application/pdf"},
+            {"doc",  "application/msword"},
+            {"xls",  "application/vnd.ms-excel"},
+            {"ppt",  "application/vnd.ms-powerpoint"},
+            {"xml",  "text/xml"},
+    };
 }

@@ -16,12 +16,12 @@ namespace cpptools::http
         Function<size_t(char *, size_t)> read;
         Header _header;
         Header _query;
-        SortMap<String, String> params;
+        SortMap<String, String> _params;
         FormData formData;
 
     public:
         HttpMethod method{HttpMethod::HTTP_GET};
-        String url;
+        String path;
         String version;
         String queryRow;
 
@@ -31,7 +31,7 @@ namespace cpptools::http
         explicit Request(Function<size_t(char *, int)> read) : read(std::move(read))
         {}
 
-        Request(Function<size_t(char *, size_t)> read, HttpMethod method, String url, String version) : read(std::move(read)), method(method), url(std::move(url)),
+        Request(Function<size_t(char *, size_t)> read, HttpMethod method, String path, String version) : read(std::move(read)), method(method), path(std::move(path)),
                                                                          version(std::move(version))
         {}
 
