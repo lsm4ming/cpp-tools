@@ -1,10 +1,7 @@
 #include "http/server_request.h"
 
-#include <utility>
-
 namespace cpptools::http
 {
-
     String Request::getParam(const String &key) const
     {
         auto it = _params.find(key);
@@ -78,5 +75,36 @@ namespace cpptools::http
     void Request::setParams(SortMap<String, String> params)
     {
         this->_params = std::move(params);
+    }
+
+    size_t Request::readBody(char *data, size_t length)
+    {
+        if (this->_length <= 0)
+        {
+            return this->readFun(data, length);
+        } else
+        {
+            // 说明预读body还有未读完的内容
+            size_t len = std::min(this->_length, length);
+            memcpy(data, this->_body, len);
+            this->_length -= len;
+            this->_body += len;
+            if(len < length)
+            {
+                // 说明预读完了的同时，还需要读fd的内容
+                return this->readFun(data + len, length - len) + len;
+            }
+            return len;
+        }
+    }
+
+    size_t Request::getContentLength() const
+    {
+        auto it = _header.find("Content-Length");
+        if (it != _header.end())
+        {
+            return std::stoi(it->second[0]);
+        }
+        return 0;
     }
 }

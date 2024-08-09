@@ -144,7 +144,7 @@ namespace cpptools::http
         Function<size_t(char *, size_t)> readFun = [ObjectPtr = &conn](auto &&PH1, auto &&PH2)
         { return ObjectPtr->read(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); };
         RequestParse parse(header);
-        Request request(readFun);
+        Request request(readFun, body.c_str(), body.length());
         if (parse.parse(request) == -1)
         {
             badRequest(conn);
