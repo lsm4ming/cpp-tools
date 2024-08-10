@@ -1,6 +1,6 @@
 #include <fcntl.h>
-#include "net/poll_epoll.h"
-#include "net/poll_channel.h"
+#include "cpptools/net/poll_epoll.h"
+#include "cpptools/net/poll_channel.h"
 
 #ifdef OS_LINUX
 namespace cpptools::net

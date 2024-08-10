@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "json/jsonparse.h"
+#include "cpptools/json/jsonparse.h"
 
 TEST(CppToolsJsonTest, JsonValue)
 {
