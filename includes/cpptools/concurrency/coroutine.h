@@ -5,8 +5,12 @@
 #include <cassert>
 #include <memory>
 #include <cstring>
-#include <ucontext.h>
 #include "cpptools/common/common.h"
+#if defined(OS_LINUX)
+#include <ucontext.h>
+#elif defined(OS_MAC)
+#include <dispatch/dispatch.h>
+#endif
 
 using namespace cpptools::common;
 
@@ -73,6 +77,9 @@ namespace cpptools::concurrency
         std::unordered_map<void *, LocalData> local;  // 协程本地变量，key是协程变量的内存地址
         int relateBatchId;                           // 关联的batchId，INVALID_BATCH_ID表示无关联的batch
         bool isInsertBatch;                          // 当前在协程中是否被插入了batchRun的卡点
+#if defined(OS_MAC)
+        dispatch_block_t task;
+#endif
     } Coroutine;
 
 // 批量执行结构体
@@ -96,6 +103,9 @@ namespace cpptools::concurrency
         int stackSize;                              // 协程栈的大小，单位字节
         std::list<int> batchFinishList;             // 完成了批量执行的关联的协程的id
         bool stackCheck;                            // 是否检测协程栈空间是否溢出
+#if defined(OS_MAC)
+        dispatch_queue_t mainQueue;
+#endif
     } Schedule;
 
 // 创建协程
@@ -159,4 +169,4 @@ namespace cpptools::concurrency
 // 关闭协程栈检查
     void ScheduleDisableStackCheck(Schedule &schedule);
 
-}  // namespace MyCoroutine
+}

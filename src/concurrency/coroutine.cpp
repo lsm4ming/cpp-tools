@@ -105,6 +105,15 @@ namespace cpptools::concurrency
         routine->priority = priority;
         routine->relateBatchId = relateBatchId;
         routine->isInsertBatch = false;
+
+#if defined(OS_MAC)
+        routine->task = dispatch_block_create(static_cast<dispatch_block_flags_t>(0), ^
+        {
+            CoroutineRun(&schedule);
+        });
+#endif
+
+#if defined(OS_LINUX)
         if (nullptr == routine->stack)
         {
             routine->stack = new uint8_t[schedule.stackSize];
@@ -122,7 +131,8 @@ namespace cpptools::concurrency
         // 这里没有直接使用entry和arg设置，而是多包了一层CoroutineRun函数的调用，
         // 是为了在CoroutineRun中entry函数执行完之后，从协程的状态更新Idle，并更新当前处于运行中的从协程id为无效id，
         // 这样这些逻辑就可以对上层调用透明。
-        makecontext(&(routine->ctx), (void (*)(void)) (CoroutineRun), 1, &schedule);
+        makecontext(&(routine->ctx), (void (*)()) (CoroutineRun), 1, &schedule);
+#endif
     }
 
     int CoroutineCreate(Schedule &schedule, Entry entry, void *arg, uint32_t priority, int relateBatchId)
@@ -160,10 +170,17 @@ namespace cpptools::concurrency
         Coroutine *routine = schedule.coroutines[schedule.runningCoroutineId];
         // 更新当前的从协程状态为挂起
         routine->state = Suspend;
+#if defined(OS_LINUX)
         // 当前的从协程让出执行权，并把当前的从协程的执行上下文保存到routine->ctx中，
         // 执行权回到主协程中，主协程再做调度，当从协程被主协程resume时，swapcontext才会返回。
         swapcontext(&routine->ctx, &(schedule.main));
         schedule.isMasterCoroutine = false;
+#endif
+
+#if defined(OS_MAC)
+        schedule.isMasterCoroutine = false;
+        dispatch_sync(schedule.mainQueue, routine->task);
+#endif
     }
 
     int CoroutineResume(Schedule &schedule)
@@ -209,9 +226,14 @@ namespace cpptools::concurrency
         }
         routine->state = Run;
         schedule.runningCoroutineId = coroutineId;
+#if defined(OS_LINUX)
         // 从主协程切换到协程编号为id的协程中执行，并把当前执行上下文保存到schedule.main中，
         // 当从协程执行结束或者从协程主动yield时，swapcontext才会返回。
         swapcontext(&schedule.main, &routine->ctx);
+#elif defined(OS_MAC)
+        schedule.isMasterCoroutine = false;
+        dispatch_sync(schedule.mainQueue, routine->task);
+#endif
         schedule.isMasterCoroutine = true;
         return Success;
     }
@@ -229,7 +251,15 @@ namespace cpptools::concurrency
         schedule.runningCoroutineId = id;
         // 从主协程切换到协程编号为id的协程中执行，并把当前执行上下文保存到schedule.main中，
         // 当从协程执行结束或者从协程主动yield时，swapcontext才会返回。
+
+#if defined(OS_LINUX)
+        // 从主协程切换到协程编号为id的协程中执行，并把当前执行上下文保存到schedule.main中，
+        // 当从协程执行结束或者从协程主动yield时，swapcontext才会返回。
         swapcontext(&schedule.main, &routine->ctx);
+#elif defined(OS_MAC)
+        schedule.isMasterCoroutine = false;
+        dispatch_sync(schedule.mainQueue, routine->task);
+#endif
         schedule.isMasterCoroutine = true;
         return Success;
     }
@@ -256,7 +286,7 @@ namespace cpptools::concurrency
     int CoroutineResumeBatchFinish(Schedule &schedule)
     {
         assert(schedule.isMasterCoroutine);
-        if (schedule.batchFinishList.size() <= 0) return NotRunnable;
+        if (schedule.batchFinishList.empty()) return NotRunnable;
         while (not schedule.batchFinishList.empty())
         {
             int cid = schedule.batchFinishList.front();
@@ -383,11 +413,14 @@ namespace cpptools::concurrency
             schedule.coroutines[i]->state = Idle;
             schedule.coroutines[i]->stack = nullptr;
         }
-        for (auto & batch : schedule.batchs)
+        for (auto &batch: schedule.batchs)
         {
             batch = new Batch;
             batch->state = Idle;
         }
+#if defined(OS_MAC)
+        schedule.mainQueue = dispatch_queue_create("coroutine_queue", DISPATCH_QUEUE_SERIAL);
+#endif
         return 0;
     }
 
@@ -414,10 +447,13 @@ namespace cpptools::concurrency
             }
             delete schedule.coroutines[i];
         }
-        for (int i = 0; i < MAX_BATCH_RUN_SIZE; i++)
+        for (auto &batch: schedule.batchs)
         {
-            delete schedule.batchs[i];
+            delete batch;
         }
+#if defined(OS_MAC)
+        dispatch_release(schedule.mainQueue);  // 释放队列
+#endif
     }
 
     bool ScheduleTryReleaseMemory(Schedule &schedule)
@@ -458,5 +494,4 @@ namespace cpptools::concurrency
 
     void ScheduleDisableStackCheck(Schedule &schedule)
     { schedule.stackCheck = false; }
-
-}  // namespace MyCoroutine
+}

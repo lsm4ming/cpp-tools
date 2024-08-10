@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstring>
+#include <print>
 #include "cpptools/common/common.h"
 
 using namespace cpptools::common;

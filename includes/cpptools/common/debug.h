@@ -1,8 +1,12 @@
 #pragma once
 
 #include <sys/resource.h>
-#include <sys/sysinfo.h>
 #include "common.h"
+#if defined(OS_MAC)
+#include <sys/sysctl.h>
+#elif defined(OS_LINUX)
+#include <sys/sysinfo.h>
+#endif
 
 namespace cpptools::common
 {
