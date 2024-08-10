@@ -1,15 +1,15 @@
 #include <iostream>
-#include "io/file.h"
-#include "time/time.h"
-#include "io/reader.h"
-#include "io/writer.h"
-#include "net/socket.h"
-#include "net/datagram.h"
-#include "json/jsonparse.h"
-#include "http/httpclient.h"
-#include "http/httpserver.h"
-#include "net/poll_channel.h"
-#include "log/log.h"
+#include "cpptools/io/file.h"
+#include "cpptools/time/time.h"
+#include "cpptools/io/reader.h"
+#include "cpptools/io/writer.h"
+#include "cpptools/net/socket.h"
+#include "cpptools/net/datagram.h"
+#include "cpptools/json/jsonparse.h"
+#include "cpptools/http/httpclient.h"
+#include "cpptools/http/httpserver.h"
+#include "cpptools/net/poll_channel.h"
+#include "cpptools/log/log.h"
 
 void ioTest()
 {
@@ -202,6 +202,14 @@ void httpServerTest()
                         auto result = "hello: " + t;
                         resp.write(result.data(), result.length());
                     });
+    server.addRoute(cpptools::http::HttpMethod::HTTP_POST, "/",
+                    [](const cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
+                    {
+                        auto t = req.getQuery("name");
+                        resp.addHeader("Content-Type", "text/plain");
+                        auto result = "hello: " + t;
+                        resp.write(result.data(), result.length());
+                    });
     server.start();
 }
 
@@ -218,6 +226,6 @@ int main()
     //jsonTest();
     //httpClientTest();
     // pollTest();
-    //httpServerTest();
+    httpServerTest();
     return 0;
 }

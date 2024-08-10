@@ -9,6 +9,8 @@ namespace cpptools::http
 {
     using RouteHandler = Function<void(const Request &, HttpResponseWriter &)>;
 
+    using DisplayRouteHandler = Function<void(const String &method, const String &path, const RouteHandler &handler)>;
+
     class HttpRouter
     {
     private:
@@ -26,5 +28,7 @@ namespace cpptools::http
         RouteHandler getHandler(const String &method, const String &pattern) const;
 
         std::pair<Node *, SortMap<String, String>> getRoute(const String &method, const String &path);
+
+        void displayRoute(const DisplayRouteHandler& handler) const;
     };
 }

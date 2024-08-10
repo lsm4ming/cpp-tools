@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <sys/stat.h>
+#include <iostream>
 #include "cpptools/common/common.h"
 #include "cpptools/net/poll_event.h"
 #include "cpptools/net/server_socket.h"

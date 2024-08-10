@@ -10,6 +10,10 @@ namespace cpptools::http
         if (roots.find(method) == roots.end())
         {
             roots[method] = new Node("", false);
+        } else
+        {
+            // 路由重复
+            throw std::runtime_error("duplicate route:" + method + " " + path);
         }
         roots[method]->insert(path, parts, 0);
         handlers[key] = handler;
@@ -88,5 +92,16 @@ namespace cpptools::http
             return nullptr;
         }
         return it->second;
+    }
+
+    void HttpRouter::displayRoute(const DisplayRouteHandler &handler) const
+    {
+        for (const auto &item: roots)
+        {
+            String method = item.first;
+            String pattern = item.second->getPattern();
+            auto f = handlers.at(method.append("-").append(pattern));
+            handler(item.first, pattern, f);
+        }
     }
 }

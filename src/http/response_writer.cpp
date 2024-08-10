@@ -115,7 +115,7 @@ namespace cpptools::http
         this->_write((char *) WRAP, 2);
 
         off_t len{};
-#ifdef defined(OS_MAC)
+#if defined(OS_MAC)
         if (::sendfile(file_fd, fd, 0, &len, nullptr, 0) <0)
 #elif defined(OS_LINUX)
         if (::sendfile(fd, file_fd, &len, count) < 0)

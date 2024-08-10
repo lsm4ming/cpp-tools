@@ -38,6 +38,13 @@ namespace cpptools::http
         auto wrapper = cpptools::net::HandlerWrapper::makeWrapper(new HttpProtocolHandler(this));
         auto poll = cpptools::net::createPollEvent(wrapper.get());
         poll->makeup(serverSocket.getFd());
+
+
+        this->router.displayRoute([](const String &method, const String &path, const RouteHandler &handler)
+                                  {
+                                      std::cout << method << " : " << path << std::endl;
+                                  });
+
         while (this->running)
         {
             poll->pollWait(1000);
