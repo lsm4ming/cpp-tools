@@ -30,65 +30,47 @@ namespace cpptools::log
 
     void Logger::log(LogLevel level, const char *file, int line, const char *function, const char *format, ...)
     {
-        if (level < this->_level)
-        {
-            return;
-        }
-
-        // 是否需要创建新文件
-        this->checkNewFile(level);
-
-        String levelStr = levelString(level);
-        String timestamp = getCurrentTimestamp();
-
         va_list args;
         va_start(args, format);
         String message = formatString(format, args);
         va_end(args);
-
-        String logMessage = "[" + timestamp + "] "
-                            + "[" + levelStr + "] "
-                            + "[" + file + ":" + std::to_string(line) + " (" + function + ")] "
-                            + message;
-        if (this->_mode == CONSOLE)
-        {
-            this->consoleOutput << logMessage << std::endl;
-        } else if (this->_mode == FILE)
-        {
-            this->logFiles[level] << logMessage << std::endl;
-        }
+        this->log(level, file, line, function, message);
     }
 
     void Logger::debug(const char *file, int line, const char *function, const char *format, ...)
     {
         va_list args;
         va_start(args, format);
-        getInstance().log(LogLevel::DEBUG, file, line, function, format, args);
+        String message = formatString(format, args);
         va_end(args);
+        getInstance().log(LogLevel::DEBUG, file, line, function, message);
     }
 
     void Logger::info(const char *file, int line, const char *function, const char *format, ...)
     {
         va_list args;
         va_start(args, format);
-        getInstance().log(LogLevel::INFO, file, line, function, format, args);
+        String message = formatString(format, args);
         va_end(args);
+        getInstance().log(LogLevel::INFO, file, line, function, message);
     }
 
     void Logger::warn(const char *file, int line, const char *function, const char *format, ...)
     {
         va_list args;
         va_start(args, format);
-        getInstance().log(LogLevel::WARN, file, line, function, format, args);
+        String message = formatString(format, args);
         va_end(args);
+        getInstance().log(LogLevel::WARN, file, line, function, message);
     }
 
     void Logger::error(const char *file, int line, const char *function, const char *format, ...)
     {
         va_list args;
         va_start(args, format);
-        getInstance().log(LogLevel::ERROR, file, line, function, format, args);
+        String message = formatString(format, args);
         va_end(args);
+        getInstance().log(LogLevel::ERROR, file, line, function, message);
     }
 
     Logger::~Logger()
@@ -147,5 +129,28 @@ namespace cpptools::log
     void Logger::setSeparateFile(bool separateFile)
     {
         this->_separateFile = separateFile;
+    }
+
+    void Logger::log(LogLevel level, const char *file, int line, const char *function, const String &content)
+    {
+        if (level < this->_level)
+        {
+            return;
+        }
+        // 是否需要创建新文件
+        this->checkNewFile(level);
+        String levelStr = levelString(level);
+        String timestamp = getCurrentTimestamp();
+        String logMessage = "[" + timestamp + "] "
+                            + "[" + levelStr + "] "
+                            + "[" + file + ":" + std::to_string(line) + " (" + function + ")] "
+                            + content;
+        if (this->_mode == CONSOLE)
+        {
+            this->consoleOutput << logMessage << std::endl;
+        } else if (this->_mode == FILE)
+        {
+            this->logFiles[level] << logMessage << std::endl;
+        }
     }
 }

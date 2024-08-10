@@ -209,17 +209,15 @@ int main()
 {
     cpptools::log::Logger::getInstance().log(cpptools::log::ERROR, "",
                                              1, "", "hello :%s", (char *) "lsm");
-
     cpptools::log::LOG_LEVEL(cpptools::log::DEBUG);
     cpptools::log::LOG_FILENAME("我的日志%Y-%m-%d{level}.log");
-
     cpptools::log::LOG_ERROR("hello :%s", "lsm");
     // ioTest();
-    timeTest();
-    netTest();
-    jsonTest();
-    httpClientTest();
+    //timeTest();
+    //netTest();
+    //jsonTest();
+    //httpClientTest();
     // pollTest();
-    httpServerTest();
+    //httpServerTest();
     return 0;
 }

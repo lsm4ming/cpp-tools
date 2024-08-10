@@ -2,11 +2,11 @@
 
 #include <sstream>
 #include <cstring>
+#include "define.h"
+#include "common/common.h"
 #ifdef OS_LINUX
 #include <sys/sendfile.h>
 #endif
-#include "common/common.h"
-#include "define.h"
 
 using namespace cpptools::common;
 

@@ -35,7 +35,7 @@ namespace cpptools::net
         int n_fds = epoll_wait(this->epoll_fd, events, MaxEvents, timeout);
         for (int i = 0; i < n_fds; i++)
         {
-            Channel channel(events[i].data.fd, events[i].events, events[i].data);
+            Channel channel(events[i].data.fd, events[i].events, &events[i].data);
             // 连接退出
             if ((events[i].events & EPOLLHUP) || (events[i].events & EPOLLERR) || (!(events[i].events & EPOLLIN)))
             {
@@ -45,7 +45,7 @@ namespace cpptools::net
             }
             if (events[i].data.fd == this->socket_fd)  // 连接加入
             {
-                channel.data.fd = _handler->onAccept(channel);
+                channel._fd = _handler->onAccept(channel);
                 channel.enableAll();
                 addChannel(&channel);
                 continue;
@@ -74,16 +74,16 @@ namespace cpptools::net
     {
         struct epoll_event ev{};
         ev.events = ch->events;
-        ev.data.fd = ch->data.fd;
-        return epoll_ctl(this->epoll_fd, EPOLL_CTL_ADD, ch->data.fd, &ev);
+        ev.data.fd = ch->_fd;
+        return epoll_ctl(this->epoll_fd, EPOLL_CTL_ADD, ch->_fd, &ev);
     }
 
     int PollEpoll::removeChannel(Channel *ch)
     {
         struct epoll_event ev{};
         ev.events = ch->events;
-        ev.data.fd = ch->data.fd;
-        return epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, ch->data.fd, &ev);
+        ev.data.fd = ch->_fd;
+        return epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, ch->_fd, &ev);
     }
 
     UniquePtr<PollEvent> createPollEvent(ChannelHandler *handler)

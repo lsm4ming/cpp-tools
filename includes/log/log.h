@@ -112,6 +112,8 @@ namespace cpptools::log
 
         void log(LogLevel level, const char *file, int line, const char *function, const char *format, ...);
 
+        void log(LogLevel level, const char *file, int line, const char *function,const String& content);
+
         static void debug(const char *file, int line, const char *function, const char *format, ...);
 
         static void info(const char *file, int line, const char *function, const char *format, ...);
