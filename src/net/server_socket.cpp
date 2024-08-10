@@ -18,7 +18,13 @@ namespace cpptools::net
         struct sockaddr_in addr{};
         addr.sin_family = AF_INET;
         addr.sin_port = htons(getPort());
-        addr.sin_addr.s_addr = inet_addr(getHost().c_str());
+        if (this->_host == "0.0.0.0" || this->_host == ":")
+        {
+            addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        } else
+        {
+            addr.sin_addr.s_addr = inet_addr(getHost().c_str());
+        }
         return ::bind(this->getFd(), (struct sockaddr *) &addr, sizeof(sockaddr));
     }
 
