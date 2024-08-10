@@ -207,11 +207,13 @@ void httpServerTest()
 
 int main()
 {
+    cpptools::log::Logger::getInstance().log(cpptools::log::ERROR, "",
+                                             1, "", "hello :%s", (char *) "lsm");
+
     cpptools::log::LOG_LEVEL(cpptools::log::DEBUG);
-    cpptools::log::LOG_MODE(cpptools::log::FILE);
     cpptools::log::LOG_FILENAME("我的日志%Y-%m-%d{level}.log");
 
-    cpptools::log::LOG_ERROR("hello");
+    cpptools::log::LOG_ERROR("hello :%s", "lsm");
     // ioTest();
     timeTest();
     netTest();

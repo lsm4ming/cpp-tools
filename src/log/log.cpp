@@ -112,8 +112,13 @@ namespace cpptools::log
         // "%Y-%m-%d"
         std::strftime(buf, sizeof(buf), this->_filename.c_str(), std::localtime(&now));
         // {level} => 等级
-        String result = std::string(buf) + ".log";
-        cpptools::utils::replaceAll(result, "{level}", levelString(level));
+        String result = std::string(buf);
+        String oldStr = "{level}";
+        size_t pos = result.find(oldStr);
+        if (pos != std::string::npos)
+        {
+            result.replace(pos, oldStr.length(), levelString(level));
+        }
         return result;
     }
 

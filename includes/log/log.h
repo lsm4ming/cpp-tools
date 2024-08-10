@@ -65,10 +65,20 @@ namespace cpptools::log
         {
             throw std::runtime_error("Error during formatting.");
         }
+
         std::unique_ptr<char[]> buf(new char[size]);
         std::vsnprintf(buf.get(), size, format, args);
 
-        return String(buf.get(), buf.get() + size - 1);
+        return {buf.get(), buf.get() + size - 1};
+    }
+
+    static String format(const char *format, ...)
+    {
+        va_list args;
+        va_start(args, format);
+        String result = formatString(format, args);
+        va_end(args);
+        return result;
     }
 
     class Logger
@@ -77,9 +87,9 @@ namespace cpptools::log
         LogLevel _level{LogLevel::INFO};
         LogMode _mode{LogMode::CONSOLE};
         String _filename{};
-        HashMap <LogLevel, std::ofstream> logFiles{};
+        HashMap<LogLevel, std::ofstream> logFiles{};
         std::ostream &consoleOutput{std::cout};
-        HashMap <LogLevel, String> currentFilenames{};
+        HashMap<LogLevel, String> currentFilenames{};
         bool _separateFile{false};
 
     private:
@@ -126,11 +136,11 @@ namespace cpptools::log
 #define LOG(level, format, ...) \
     Logger::getInstance().log(level, __FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
 #define LOG_DEBUG(format, ...) \
-    Logger::getInstance().debug(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
+    Logger::debug(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
 #define LOG_INFO(format, ...) \
-    Logger::getInstance().info(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
+    Logger::info(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
 #define LOG_WARNING(format, ...) \
-    Logger::getInstance().warning(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
+    Logger::warn(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
 #define LOG_ERROR(format, ...) \
-    Logger::getInstance().error(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
+    Logger::error(__FILE__, __LINE__, __FUNCTION__, format, ##__VA_ARGS__)
 }
