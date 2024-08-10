@@ -32,7 +32,7 @@ namespace cpptools::log
     {
         va_list args;
         va_start(args, format);
-        String message = formatString(format, args);
+        String message = cpptools::utils::Strings::formatString(format, args);
         va_end(args);
         this->log(level, file, line, function, message);
     }
@@ -41,7 +41,7 @@ namespace cpptools::log
     {
         va_list args;
         va_start(args, format);
-        String message = formatString(format, args);
+        String message = cpptools::utils::Strings::formatString(format, args);
         va_end(args);
         getInstance().log(LogLevel::DEBUG, file, line, function, message);
     }
@@ -50,7 +50,7 @@ namespace cpptools::log
     {
         va_list args;
         va_start(args, format);
-        String message = formatString(format, args);
+        String message = cpptools::utils::Strings::formatString(format, args);
         va_end(args);
         getInstance().log(LogLevel::INFO, file, line, function, message);
     }
@@ -59,7 +59,7 @@ namespace cpptools::log
     {
         va_list args;
         va_start(args, format);
-        String message = formatString(format, args);
+        String message = cpptools::utils::Strings::formatString(format, args);
         va_end(args);
         getInstance().log(LogLevel::WARN, file, line, function, message);
     }
@@ -68,7 +68,7 @@ namespace cpptools::log
     {
         va_list args;
         va_start(args, format);
-        String message = formatString(format, args);
+        String message = cpptools::utils::Strings::formatString(format, args);
         va_end(args);
         getInstance().log(LogLevel::ERROR, file, line, function, message);
     }

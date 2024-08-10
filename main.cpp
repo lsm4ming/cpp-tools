@@ -10,6 +10,11 @@
 #include "cpptools/http/httpserver.h"
 #include "cpptools/net/poll_channel.h"
 #include "cpptools/log/log.h"
+#include "cpptools/common/flag.h"
+#include "cpptools/common/argv.h"
+#include "cpptools/utils/proc.h"
+#include "cpptools/utils/network.h"
+#include "cpptools/concurrency/coroutine.h"
 
 void ioTest()
 {
@@ -213,19 +218,57 @@ void httpServerTest()
     server.start();
 }
 
-int main()
+void usage()
+{
+    std::cout << "usage: cpptools [options]" << std::endl;
+}
+
+void logTest(int argc, char **argv)
 {
     cpptools::log::Logger::getInstance().log(cpptools::log::ERROR, "",
                                              1, "", "hello :%s", (char *) "lsm");
     cpptools::log::LOG_LEVEL(cpptools::log::DEBUG);
     cpptools::log::LOG_FILENAME("我的日志%Y-%m-%d{level}.log");
     cpptools::log::LOG_ERROR("hello :%s", "lsm");
+
+
+    std::cout << cpptools::utils::Proc::getSelfNam() << std::endl;
+    std::cout << cpptools::utils::Network::getIp("eth0") << std::endl;
+
+    cpptools::common::Argv ar;
+    String name = "lsm";
+    ar.set("name", (void *) &name);
+    auto &retrievedName = ar.get<String>("name");
+    std::cout << "name: " << retrievedName << std::endl;
+
+    cpptools::common::SetUsage(usage);
+    String host;
+    int64_t port;
+    cpptools::common::StrOpt(&host, "host", "127.0.0.1");
+    cpptools::common::Int64OptRequired(&port, "port");
+    cpptools::common::Parse(argc, argv);
+}
+
+void coroutineRun(void *arg)
+{
+}
+
+void coroutineTest()
+{
+    cpptools::concurrency::Schedule schedule;
+    cpptools::concurrency::CoroutineCreate(schedule, coroutineRun, nullptr);
+}
+
+int main(int argc, char **argv)
+{
     // ioTest();
-    //timeTest();
-    //netTest();
-    //jsonTest();
-    //httpClientTest();
+    // timeTest();
+    // netTest();
+    // jsonTest();
+    // httpClientTest();
     // pollTest();
-    httpServerTest();
+    // httpServerTest();
+    // logTest(argc, argv);
+    coroutineTest();
     return 0;
 }

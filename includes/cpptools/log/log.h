@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstdarg>
 #include "cpptools/common/common.h"
-#include "cpptools/utils/string.h"
+#include "cpptools/utils/strings.h"
 
 using namespace cpptools::common;
 
@@ -51,34 +51,6 @@ namespace cpptools::log
         char buf[80];
         std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", std::localtime(&now));
         return buf;
-    }
-
-    static std::string formatString(const char *format, va_list args)
-    {
-        va_list argsCopy;
-        va_copy(argsCopy, args);
-
-        int size = std::vsnprintf(nullptr, 0, format, argsCopy) + 1;
-        va_end(argsCopy);
-
-        if (size <= 0)
-        {
-            throw std::runtime_error("Error during formatting.");
-        }
-
-        std::unique_ptr<char[]> buf(new char[size]);
-        std::vsnprintf(buf.get(), size, format, args);
-
-        return {buf.get(), buf.get() + size - 1};
-    }
-
-    static String format(const char *format, ...)
-    {
-        va_list args;
-        va_start(args, format);
-        String result = formatString(format, args);
-        va_end(args);
-        return result;
     }
 
     class Logger

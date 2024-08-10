@@ -19,7 +19,7 @@ namespace cpptools::http
 
     int RequestParse::parseRequestLine(Request &request)
     {
-        int lineIndex = cpptools::utils::indexOf(this->raw, "\r\n");
+        int lineIndex = cpptools::utils::Strings::indexOf(this->raw, "\r\n");
         if (lineIndex == -1)
         {
             return -1;
@@ -27,7 +27,7 @@ namespace cpptools::http
         String line = this->raw.substr(0, lineIndex);
         this->raw = this->raw.substr(lineIndex + 2);
         // 根据空格分隔字符串
-        StringList line_match_result = cpptools::utils::split(line, EMPTY);
+        StringList line_match_result = cpptools::utils::Strings::split(line, EMPTY);
         if (line_match_result.size() != 3)
         {
             return -1;
@@ -42,7 +42,7 @@ namespace cpptools::http
             Header query;
             request.queryRow = request.path.substr(request.path.find(QUESTION_MARK) + 1);
             request.path = request.path.substr(0, request.path.find(QUESTION_MARK));
-            StringList querys = cpptools::utils::split(request.queryRow, AMP);
+            StringList querys = cpptools::utils::Strings::split(request.queryRow, AMP);
             for (auto &item: querys)
             {
                 size_t index = item.find(EQUAL);
@@ -62,7 +62,7 @@ namespace cpptools::http
     int RequestParse::parseRequestHeader(Request &request)
     {
         // 根据换行分隔字符串
-        StringList line_match_result = cpptools::utils::split(this->raw, WRAP);
+        StringList line_match_result = cpptools::utils::Strings::split(this->raw, WRAP);
         Header header;
         for (auto &item: line_match_result)
         {

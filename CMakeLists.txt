@@ -17,9 +17,6 @@ message(STATUS "RECURSE FILE IS:" ${CPP_SOURCES})
 # 添加三方库
 add_subdirectory(third_party)
 
-# 添加单元测试
-enable_testing()
-
 # 创建静态库目标
 add_library(cpptools STATIC ${CPP_SOURCES})
 
