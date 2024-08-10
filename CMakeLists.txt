@@ -24,4 +24,4 @@ enable_testing()
 add_library(cpp-tools STATIC ${CPP_SOURCES})
 
 # 设置 cpp-tools 目标的包含目录
-target_include_directories(cpp-tools PRIVATE includes)
+target_include_directories(cpp-tools PUBLIC includes)
