@@ -20,15 +20,8 @@ add_subdirectory(third_party)
 # 添加单元测试
 enable_testing()
 
-# 创建 INTERFACE 目标
-add_library(cpptools_include INTERFACE)
-target_include_directories(cpptools_include INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/includes)
-
-# 创建实际的库目标
+# 创建静态库目标
 add_library(cpptools STATIC ${CPP_SOURCES})
-
-# 链接 INTERFACE 目标到实际的库目标
-target_link_libraries(cpptools PUBLIC cpptools_include)
 
 # 设置 cpp-tools 目标的包含目录
 target_include_directories(cpptools PUBLIC includes)
