@@ -16,8 +16,8 @@ namespace cpptools::concurrency
         {
             _threads.emplace_back([this]
                                   {
-                                      printf("create %s thread(%ld).\n", this->name.c_str(),
-                                             GET_TID());     // 显示线程类型和线程ID。
+                                      // 显示线程类型和线程ID
+                                      std::cout << "create " << this->name << " thread(" << std::this_thread::get_id() << ")." << std::endl;
                                       while (running)
                                       {
                                           std::function<void()> task;       // 用于存放出队的元素。

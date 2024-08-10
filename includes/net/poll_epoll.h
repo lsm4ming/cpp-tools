@@ -10,8 +10,6 @@
 
 namespace cpptools::net
 {
-    constexpr const size_t MaxEvents = 1024;
-
     class PollEpoll : public PollEvent
     {
     private:

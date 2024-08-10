@@ -3,6 +3,7 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <iostream>
 #include "common/common.h"
 #include "thread_pool.h"
 

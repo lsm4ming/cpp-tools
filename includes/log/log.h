@@ -53,7 +53,7 @@ namespace cpptools::log
         return buf;
     }
 
-    std::string formatString(const char *format, va_list args)
+    static std::string formatString(const char *format, va_list args)
     {
         va_list argsCopy;
         va_copy(argsCopy, args);

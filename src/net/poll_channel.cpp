@@ -1,21 +1,20 @@
-#include <fcntl.h>
 #include "net/poll_channel.h"
 
 namespace cpptools::net
 {
     void cpptools::net::Channel::enableReading()
     {
-        events |= EPOLLIN;
+        events |= EVENT_READ;
     }
 
     int Channel::getFd() const
     {
-        return this->data.fd;
+        return this->_fd;
     }
 
     void Channel::enableWriting()
     {
-        events |= EPOLLOUT;
+        events |= EVENT_WRITE;
     }
 
     void Channel::disableAll()
@@ -25,18 +24,18 @@ namespace cpptools::net
 
     void Channel::enableAll()
     {
-        events = EPOLLIN | EPOLLET;
+        events = EVENT_ALL;
         this->enableNoBlocking();
     }
 
     void Channel::enableEt()
     {
-        events |= EPOLLET;
+        events |= EVENT_ET;
     }
 
     void Channel::enableNoBlocking() const
     {
-        fcntl(this->data.fd, F_SETFL, O_NONBLOCK);
+        fcntl(this->_fd, F_SETFL, O_NONBLOCK);
     }
 }
 

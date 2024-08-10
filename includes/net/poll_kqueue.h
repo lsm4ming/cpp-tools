@@ -3,8 +3,9 @@
 #include "common/common.h"
 
 #ifdef OS_MAC
-
 #include <sys/event.h>
+#include <unistd.h>
+#include <memory>
 #include "poll_channel.h"
 #include "poll_event.h"
 
@@ -20,15 +21,19 @@ namespace cpptools::net
     private:
         int socket_fd{-1};
         int kqueue_fd{-1};
+        ChannelHandler *_handler;
 
     public:
         PollKqueue() = default;
+
+        explicit PollKqueue(ChannelHandler *_handler) : _handler(_handler)
+        {}
 
         int makeup(int fd) override;
 
         void close() override;
 
-        Vector<Channel *> poll(int timeout) override;
+        int pollWait(int timeout) override;
 
         int updateChannel(Channel *ch) override;
 

@@ -11,6 +11,8 @@ namespace cpptools::net
 
     class ChannelHandler;
 
+    constexpr const size_t MaxEvents = 1024;
+
     class PollEvent
     {
     public:

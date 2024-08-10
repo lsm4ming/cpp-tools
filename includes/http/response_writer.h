@@ -2,7 +2,9 @@
 
 #include <sstream>
 #include <cstring>
+#ifdef OS_LINUX
 #include <sys/sendfile.h>
+#endif
 #include "common/common.h"
 #include "define.h"
 

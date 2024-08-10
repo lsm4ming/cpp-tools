@@ -1,6 +1,8 @@
 #pragma once
 
-#include "common/common.h"
+#include <netinet/in.h>
+#include <unistd.h>
+#include "net/poll_channel.h"
 #include "inet_address.h"
 
 using namespace cpptools::common;

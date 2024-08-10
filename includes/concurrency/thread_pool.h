@@ -6,8 +6,6 @@ using namespace cpptools::common;
 
 namespace cpptools::concurrency
 {
-    #define GET_TID() syscall(SYS_gettid)
-
     class ThreadPool
     {
     protected:
