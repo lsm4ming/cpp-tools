@@ -5,8 +5,6 @@ project(cpp-tools)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(includes)
-
 # 扫描src目录内所有cpp文件
 file(GLOB_RECURSE CPP_SOURCES src/*.cpp)
 
@@ -22,10 +20,8 @@ add_subdirectory(third_party)
 # 添加单元测试
 enable_testing()
 
-#add_executable(cpp-tools main.cpp ${CPP_SOURCES})
-#
-#add_executable(json-test src/tests/json_test.cpp ${CPP_SOURCES})
-#
-#target_link_libraries(json-test gtest gtest_main)
+# 创建静态库目标
+add_library(cpp-tools STATIC ${CPP_SOURCES})
 
-add_library(cpp_tools STATIC ${CPP_SOURCES})
+# 设置 cpp-tools 目标的包含目录
+target_include_directories(cpp-tools PRIVATE includes)
