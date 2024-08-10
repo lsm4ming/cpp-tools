@@ -23,5 +23,9 @@ enable_testing()
 # 创建静态库目标
 add_library(cpptools STATIC ${CPP_SOURCES})
 
-# 设置 cpp-tools 目标的包含目录
+# 设置 cpptools 目标的包含目录
 target_include_directories(cpptools PUBLIC includes)
+
+include_directories(includes)
+
+add_executable(cpptools_exec main.cpp ${CPP_SOURCES})
