@@ -249,14 +249,28 @@ void logTest(int argc, char **argv)
     cpptools::common::Parse(argc, argv);
 }
 
+std::atomic_int count = 0;
+
 void coroutineRun(void *arg)
 {
+    std::cout << "coroutineRun..." << ++count << std::endl;
 }
 
 void coroutineTest()
 {
-    cpptools::concurrency::Schedule schedule;
-    cpptools::concurrency::CoroutineCreate(schedule, coroutineRun, nullptr);
+    using namespace cpptools::concurrency;
+    Schedule schedule;
+    ScheduleInit(schedule, 100, 64 * 1024);
+    for (int i = 0; i < 100; ++i)
+    {
+        CoroutineCreate(schedule, coroutineRun, nullptr);
+    }
+    while (ScheduleRunning(schedule))
+    {
+        CoroutineResume(schedule);
+    }
+    ScheduleClean(schedule);
+    std::cout << "运行完毕，count=" << count << std::endl;
 }
 
 int main(int argc, char **argv)

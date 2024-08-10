@@ -383,10 +383,10 @@ namespace cpptools::concurrency
             schedule.coroutines[i]->state = Idle;
             schedule.coroutines[i]->stack = nullptr;
         }
-        for (int i = 0; i < MAX_BATCH_RUN_SIZE; i++)
+        for (auto & batch : schedule.batchs)
         {
-            schedule.batchs[i] = new Batch;
-            schedule.batchs[i]->state = Idle;
+            batch = new Batch;
+            batch->state = Idle;
         }
         return 0;
     }
