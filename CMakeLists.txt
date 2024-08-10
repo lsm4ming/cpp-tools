@@ -22,9 +22,10 @@ add_subdirectory(third_party)
 # 添加单元测试
 enable_testing()
 
-add_executable(cpp-tools main.cpp ${CPP_SOURCES})
+#add_executable(cpp-tools main.cpp ${CPP_SOURCES})
+#
+#add_executable(json-test src/tests/json_test.cpp ${CPP_SOURCES})
+#
+#target_link_libraries(json-test gtest gtest_main)
 
-add_executable(json-test src/tests/json_test.cpp ${CPP_SOURCES})
-
-target_link_libraries(json-test gtest gtest_main)
-# add_library(cpp_tools STATIC ${CPP_SOURCES})
+add_library(cpp_tools STATIC ${CPP_SOURCES})
