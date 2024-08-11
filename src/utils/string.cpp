@@ -107,9 +107,28 @@ namespace cpptools::utils
 
     String Strings::trim(const String &str)
     {
+        auto result = ltrim(str);
+        return std::move(rtrim(result));
+    }
+
+    String Strings::ltrim(const String &str)
+    {
         size_t first = str.find_first_not_of(' ');
+        if (first == String::npos)
+        {
+            return str;
+        }
+        return str.substr(first);
+    }
+
+    String Strings::rtrim(const String &str)
+    {
         size_t last = str.find_last_not_of(' ');
-        return str.substr(first, last - first + 1);
+        if (last == String::npos)
+        {
+            return str;
+        }
+        return str.substr(0, last + 1);
     }
 }
 

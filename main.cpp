@@ -273,10 +273,6 @@ void coroutineTest()
     std::cout << "运行完毕，count=" << count << std::endl;
 }
 
-void macCoroutineTest()
-{
-}
-
 int main(int argc, char **argv)
 {
     // ioTest();

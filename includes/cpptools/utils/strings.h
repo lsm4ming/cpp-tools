@@ -76,7 +76,21 @@ namespace cpptools::utils
          * @param sep
          * @return
          */
-        static String Join(Vector<String> &list, const String& sep);
+        static String Join(Vector <String> &list, const String &sep);
+
+        /**
+         * 去除字符串前面空格
+         * @param str
+         * @return
+         */
+        static String ltrim(const String &str);
+
+        /**
+         * 去除字符串后面空格
+         * @param str
+         * @return
+         */
+        static String rtrim(const String &str);
 
         /**
          * 去除字符串前后空格
