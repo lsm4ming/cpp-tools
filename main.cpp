@@ -204,7 +204,7 @@ void httpServerTest()
     server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/category", nullptr);
     server.addRoute(cpptools::http::HttpMethod::HTTP_POST, "/category", nullptr);
     server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/",
-                    [](const cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
+                    []( cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
                     {
                         auto t = req.getQuery("name");
                         resp.addHeader("Content-Type", "text/plain");
@@ -294,7 +294,7 @@ int main(int argc, char **argv)
     // jsonTest();
     // httpClientTest();
     // pollTest();
-    configTest();
+    // configTest();
     httpServerTest();
     logTest(argc, argv);
     coroutineTest();

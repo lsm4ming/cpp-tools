@@ -8,7 +8,7 @@
 
 namespace cpptools::http
 {
-    using RouteHandler = Function<void(const Request &, HttpResponseWriter &)>;
+    using RouteHandler = Function<void(Request &, HttpResponseWriter &)>;
 
     using DisplayRouteHandler = Function<void(const String &method, const String &path, const RouteHandler &handler)>;
 
