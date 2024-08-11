@@ -1,6 +1,6 @@
-#include "cpptools/utils/config.h"
+#include "cpptools/common/config.h"
 
-namespace cpptools::utils
+namespace cpptools::common
 {
     bool IniConfig::load(const String &path)
     {
@@ -76,26 +76,32 @@ namespace cpptools::utils
         if (!key.empty() && !value.empty()) this->_cfg[section][key] = value;
     }
 
-    String IniConfig::getStrValue(const String &section, const String &key, const String &defaultValue)
+    String IniConfig::getStrValue(const String &section, const String &key, const String &defaultValue) const
     {
         if (this->_cfg.find(section) == this->_cfg.end())
         {
             return defaultValue;
         }
-        if (this->_cfg[section].find(key) == this->_cfg[section].end())
+        auto sectionMap = this->_cfg.find(section);
+        if (sectionMap == this->_cfg.end())
         {
             return defaultValue;
         }
-        return this->_cfg[section][key];
+        auto valueMap = sectionMap->second.find(key);
+        if (valueMap == sectionMap->second.end())
+        {
+            return defaultValue;
+        }
+        return valueMap->second;
     }
 
-    int64 IniConfig::getIntValue(const String &section, const String &key, int64 defaultValue)
+    int64 IniConfig::getIntValue(const String &section, const String &key, int64 defaultValue) const
     {
         auto value = this->getStrValue(section, key, std::to_string(defaultValue));
         return std::stoll(value);
     }
 
-    size_t IniConfig::save(const String &path)
+    size_t IniConfig::save(const String &path) const
     {
         std::ofstream out;
         out.open(path.c_str());

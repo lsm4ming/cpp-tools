@@ -4,12 +4,12 @@
 #include <variant>
 #include <fstream>
 #include <sys/stat.h>
-#include "strings.h"
+#include "cpptools/utils/strings.h"
 #include "cpptools/common/common.h"
 
-using namespace cpptools::common;
+using namespace cpptools::utils;
 
-namespace cpptools::utils
+namespace cpptools::common
 {
     class IniConfig
     {
@@ -19,11 +19,11 @@ namespace cpptools::utils
     public:
         bool load(const String &path);
 
-        size_t save(const String &path);
+        size_t save(const String &path) const;
 
-        String getStrValue(const String &section, const String &key, const String &defaultValue);
+        String getStrValue(const String &section, const String &key, const String &defaultValue) const;
 
-        int64 getIntValue(const String &section, const String &key, int64 defaultValue);
+        int64 getIntValue(const String &section, const String &key, int64 defaultValue) const;
 
     private:
         static bool parseLine(String &line, String &section, String &key, String &value);
