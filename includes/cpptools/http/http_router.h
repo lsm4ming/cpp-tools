@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include "cpptools/common/common.h"
 #include "http_router_trie.h"
 #include "server_request.h"

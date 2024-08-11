@@ -7,13 +7,14 @@ namespace cpptools::http
     {
         Vector<String> parts = parsePattern(path);
         String key = method + "-" + path;
+        // 路由是否重复
+        if (handlers.find(key) != handlers.end())
+        {
+            throw std::runtime_error("duplicate route:" + method + " " + path);
+        }
         if (roots.find(method) == roots.end())
         {
             roots[method] = new Node("", false);
-        } else
-        {
-            // 路由重复
-            throw std::runtime_error("duplicate route:" + method + " " + path);
         }
         roots[method]->insert(path, parts, 0);
         handlers[key] = handler;
@@ -96,12 +97,15 @@ namespace cpptools::http
 
     void HttpRouter::displayRoute(const DisplayRouteHandler &handler) const
     {
-        for (const auto &item: roots)
+        std::cout << "========route display start========" << std::endl;
+        for (const auto &item: handlers)
         {
-            String method = item.first;
-            String pattern = item.second->getPattern();
-            auto f = handlers.at(method.append("-").append(pattern));
-            handler(item.first, pattern, f);
+            String key = item.first;
+            // - 分割
+            String method = key.substr(0, key.find('-'));
+            String path = key.substr(key.find('-') + 1);
+            handler(method, path, item.second);
         }
+        std::cout << "========route display end========" << std::endl;
     }
 }

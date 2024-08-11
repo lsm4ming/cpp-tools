@@ -199,6 +199,9 @@ void pollTest()
 void httpServerTest()
 {
     cpptools::http::HttpServer server("127.0.0.1", 9999);
+
+    server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/category", nullptr);
+    server.addRoute(cpptools::http::HttpMethod::HTTP_POST, "/category", nullptr);
     server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/",
                     [](const cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
                     {
@@ -281,7 +284,7 @@ int main(int argc, char **argv)
     // jsonTest();
     // httpClientTest();
     // pollTest();
-    // httpServerTest();
+    httpServerTest();
     logTest(argc, argv);
     coroutineTest();
     return 0;
