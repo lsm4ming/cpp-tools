@@ -4,10 +4,14 @@ namespace cpptools::common
 {
     bool IniConfig::load(const String &path)
     {
-        if (path.empty()) return false;
+        if (!path.empty())
+        {
+            this->_path = path;
+        }
+        if (this->_path.empty()) return false;
         std::ifstream in;
         std::string line;
-        in.open(path.c_str());
+        in.open(this->_path.c_str());
         if (not in.is_open()) return false;
 
         // 考虑reload，清空之前的配置
@@ -15,6 +19,9 @@ namespace cpptools::common
 
         while (getline(in, line))
         {
+            // 去除换行符
+            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+            line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
             std::string section, key, value;
             if (not parseLine(line, section, key, value))
             {
@@ -43,7 +50,7 @@ namespace cpptools::common
             curSection = section;
             return false;
         }
-        if (curSection.empty()) return false;
+        // if (curSection.empty()) return false;
         bool isKey = true;
         for (char i: line)
         {

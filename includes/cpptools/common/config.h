@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstring>
+#include <utility>
 #include <variant>
 #include <fstream>
 #include <sys/stat.h>
@@ -15,15 +16,18 @@ namespace cpptools::common
     {
     private:
         SortMap<String, SortMap<String, String>> _cfg;
+        String _path;
 
     public:
-        bool load(const String &path);
+        explicit IniConfig(String path="") : _path(std::move(path)) {};
 
-        size_t save(const String &path) const;
+        bool load(const String &path="");
 
-        String getStrValue(const String &section, const String &key, const String &defaultValue) const;
+        [[nodiscard]] size_t save(const String &path) const;
 
-        int64 getIntValue(const String &section, const String &key, int64 defaultValue) const;
+        [[nodiscard]] String getStrValue(const String &section, const String &key, const String &defaultValue) const;
+
+        [[nodiscard]] int64 getIntValue(const String &section, const String &key, int64 defaultValue) const;
 
     private:
         static bool parseLine(String &line, String &section, String &key, String &value);

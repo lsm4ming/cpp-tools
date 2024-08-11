@@ -12,6 +12,7 @@
 #include "cpptools/log/log.h"
 #include "cpptools/common/flag.h"
 #include "cpptools/common/argv.h"
+#include "cpptools/common/config.h"
 #include "cpptools/utils/proc.h"
 #include "cpptools/utils/network.h"
 #include "cpptools/concurrency/coroutine.h"
@@ -276,6 +277,15 @@ void coroutineTest()
     std::cout << "运行完毕，count=" << count << std::endl;
 }
 
+void configTest()
+{
+    cpptools::common::IniConfig config("../test.ini");
+    if (!config.load())
+    {
+        throw std::runtime_error("load config failed");
+    }
+}
+
 int main(int argc, char **argv)
 {
     // ioTest();
@@ -284,6 +294,7 @@ int main(int argc, char **argv)
     // jsonTest();
     // httpClientTest();
     // pollTest();
+    configTest();
     httpServerTest();
     logTest(argc, argv);
     coroutineTest();
