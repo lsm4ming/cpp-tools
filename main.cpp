@@ -91,6 +91,10 @@ void jsonTest()
     auto name = jsonValue["name"];
     std::cout << name.getType() << std::endl;
 
+    auto jsonArray = cpptools::json::JsonArray();
+    jsonArray.push_back(1);
+    jsonArray.push_back("123");
+    std::cout << jsonArray.toString() << std::endl;
 
     auto objectValue = cpptools::json::JsonParse::parse(R"(  {"a": 1, "b": 2.5 , "c":"hello"})");
     std::cout << objectValue.getType() << std::endl;
@@ -204,7 +208,7 @@ void httpServerTest()
     server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/category", nullptr);
     server.addRoute(cpptools::http::HttpMethod::HTTP_POST, "/category", nullptr);
     server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/",
-                    []( cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
+                    [](cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
                     {
                         auto t = req.getQuery("name");
                         resp.addHeader("Content-Type", "text/plain");
@@ -291,12 +295,12 @@ int main(int argc, char **argv)
     // ioTest();
     // timeTest();
     // netTest();
-    // jsonTest();
+    jsonTest();
     // httpClientTest();
     // pollTest();
     // configTest();
-    httpServerTest();
-    logTest(argc, argv);
-    coroutineTest();
+//    httpServerTest();
+//    logTest(argc, argv);
+//    coroutineTest();
     return 0;
 }
