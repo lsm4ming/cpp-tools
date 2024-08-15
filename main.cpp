@@ -214,6 +214,7 @@ void pong(cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp
 
 void httpServerTest()
 {
+    cpptools::log::LOG_LEVEL(cpptools::log::DEBUG);
     cpptools::http::HttpServer server("0.0.0.0", 9999);
 
     server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/ping", pong);
@@ -305,11 +306,11 @@ int main(int argc, char **argv)
     // ioTest();
     // timeTest();
     // netTest();
-    jsonTest();
+    // jsonTest();
     // httpClientTest();
     // pollTest();
     // configTest();
-//    httpServerTest();
+    httpServerTest();
 //    logTest(argc, argv);
 //    coroutineTest();
     return 0;

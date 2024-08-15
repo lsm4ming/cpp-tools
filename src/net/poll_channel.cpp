@@ -44,6 +44,7 @@ namespace cpptools::net
         {
             return -1;
         }
+        cpptools::log::LOG_DEBUG("服务端主动退出,fd=%d", this->_fd);
         return this->removeChannel();
     }
 
@@ -61,7 +62,7 @@ namespace cpptools::net
         struct epoll_event ev{};
         ev.events = this->events;
         ev.data.fd = this->_fd;
-        cpptools::log::LOG_INFO("连接加入,fd=%d", this->_fd);
+        cpptools::log::LOG_DEBUG("连接加入,fd=%d", this->_fd);
         return epoll_ctl(this->poll_fd, EPOLL_CTL_ADD, this->_fd, &ev);
     }
 
@@ -70,7 +71,6 @@ namespace cpptools::net
         struct epoll_event ev{};
         ev.events = this->events;
         ev.data.fd = this->_fd;
-        cpptools::log::LOG_INFO("连接退出,fd=%d", this->_fd);
         return epoll_ctl(this->poll_fd, EPOLL_CTL_DEL, this->_fd, &ev);
     }
 }

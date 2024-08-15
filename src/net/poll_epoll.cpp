@@ -34,14 +34,17 @@ namespace cpptools::net
         for (int i = 0; i < n_fds; i++)
         {
             Channel channel(events[i].data.fd, events[i].events, this->epoll_fd);
-            cpptools::log::LOG_INFO("触发事件 events[i].data.fd=%d", events[i].data.fd);
+            cpptools::log::LOG_DEBUG("触发事件 events[i].data.fd=%d", events[i].data.fd);
             // 连接退出
-            if ((events[i].events & EPOLLHUP) || (events[i].events & EPOLLERR) || (!(events[i].events & EPOLLIN)))
+            if ((events[i].events & (EPOLLERR | EPOLLHUP)))
             {
+                cpptools::log::LOG_DEBUG("客户端连接关闭,fd=%d", events[i].data.fd);
                 if (channel.removeChannel() < 0)
                 {
-                    cpptools::log::LOG_ERROR("removeChannel error");
+                    cpptools::log::LOG_ERROR("Failed to remove channel");
                 }
+                // 关闭fd
+                ::close(events[i].data.fd);
                 _handler->onClose(channel);
                 continue;
             }
