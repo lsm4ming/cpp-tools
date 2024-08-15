@@ -1,10 +1,10 @@
 #pragma once
 
 #include <cstring>
+#include "cpptools/common/common.h"
 #if defined(OS_MAC)
 #include <print>
 #endif
-#include "cpptools/common/common.h"
 
 using namespace cpptools::common;
 

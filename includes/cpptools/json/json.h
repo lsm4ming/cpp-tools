@@ -49,7 +49,8 @@ namespace cpptools::json
         {};
 
         explicit JsonValue(bool val) : JsonValue(JsonToken::BoolValue, val)
-        {};
+        {
+        };
 
         explicit JsonValue(int val) : JsonValue(JsonToken::IntValue, val)
         {};
@@ -171,6 +172,19 @@ namespace cpptools::json
         [[nodiscard]] int size() const;
 
         void push_back(const JsonValuer &val);
+
+        template<std::size_t N>
+        void push_back(const char (&arr)[N])
+        {
+            this->value.push_back(std::make_shared<JsonValue>(String(arr)));
+        }
+
+        // 模板成员函数
+        template<typename T>
+        void push_back(const T &val)
+        {
+            this->value.push_back(std::make_shared<JsonValue>(val));
+        }
 
         JsonValuer &get(int index);
 
