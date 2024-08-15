@@ -30,9 +30,11 @@ namespace cpptools::net
     private:
         const InetAddress clientAddress;
         int _fd;
+        const Channel &channel;
 
     public:
-        PollConn(int fd, const InetAddress &addr) : _fd(fd), clientAddress(addr)
+        PollConn(int fd, const InetAddress &addr, const Channel &channel) : _fd(fd), clientAddress(addr),
+                                                                            channel(channel)
         {};
 
         ~PollConn() = default;
@@ -46,11 +48,11 @@ namespace cpptools::net
 
         size_t write(const void *buf, size_t len) const;
 
-        void close() const;
+        int close() const;
 
         void flush() const;
 
-        int getFd() const
+        [[nodiscard]] int getFd() const
         {
             return this->_fd;
         }
@@ -105,7 +107,7 @@ namespace cpptools::net
         void onClose(const Channel &channel) override;
 
         template<typename T>
-        static UniquePtr <HandlerWrapper> makeWrapper(T &&handler)
+        static UniquePtr<HandlerWrapper> makeWrapper(T &&handler)
         {
             return std::make_unique<HandlerWrapper>(std::forward<T>(handler));
         }

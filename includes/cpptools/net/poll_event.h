@@ -37,27 +37,6 @@ namespace cpptools::net
          * @return
          */
         virtual int pollWait(int timeout) = 0;
-
-        /**
-         * 更新Channel
-         * @param ch
-         * @return
-         */
-        virtual int updateChannel(Channel *ch) = 0;
-
-        /**
-         * 添加Channel
-         * @param ch
-         * @return
-         */
-        virtual int addChannel(Channel *ch) = 0;
-
-        /**
-         * 删除Channel
-         * @param ch
-         * @return
-         */
-        virtual int removeChannel(Channel *ch) = 0;
     };
 
     extern UniquePtr<PollEvent> createPollEvent(ChannelHandler *handler);

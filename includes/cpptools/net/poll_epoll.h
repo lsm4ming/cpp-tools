@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cpptools/common/common.h"
+#include "cpptools/log/log.h"
 #include "poll_event.h"
 #include "poll.h"
 
@@ -25,12 +26,6 @@ namespace cpptools::net
         void close() override;
 
         int pollWait(int timeout) override;
-
-        int updateChannel(Channel *ch) override;
-
-        int addChannel(Channel *ch) override;
-
-        int removeChannel(Channel *ch) override;
     };
 }
 #endif

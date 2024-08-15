@@ -14,10 +14,11 @@ namespace cpptools::net
         int client_fd = accept(channel.getFd(), (struct sockaddr *) &client_addr, &client);
         if (client_fd == -1)
         {
+            perror("accept error");
             throw std::runtime_error("accept error");
         }
         InetAddress address(client_addr);
-        auto conn = std::make_shared<PollConn>(client_fd, address);
+        auto conn = std::make_shared<PollConn>(client_fd, address, channel);
         this->connMap.insert({client_fd, conn});
         this->customHandler->onAccept(*conn);
         return client_fd;
@@ -71,9 +72,9 @@ namespace cpptools::net
         return ::write(this->_fd, buf, len);
     }
 
-    void PollConn::close() const
+    int PollConn::close() const
     {
-        ::close(this->_fd);
+        return this->channel.close();
     }
 
     void PollConn::flush() const

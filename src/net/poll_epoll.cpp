@@ -1,6 +1,4 @@
-#include <fcntl.h>
 #include "cpptools/net/poll_epoll.h"
-#include "cpptools/net/poll_channel.h"
 
 #ifdef OS_LINUX
 namespace cpptools::net
@@ -35,11 +33,15 @@ namespace cpptools::net
         int n_fds = epoll_wait(this->epoll_fd, events, MaxEvents, timeout);
         for (int i = 0; i < n_fds; i++)
         {
-            Channel channel(events[i].data.fd, events[i].events, &events[i].data);
+            Channel channel(events[i].data.fd, events[i].events, this->epoll_fd);
+            cpptools::log::LOG_INFO("触发事件 events[i].data.fd=%d", events[i].data.fd);
             // 连接退出
             if ((events[i].events & EPOLLHUP) || (events[i].events & EPOLLERR) || (!(events[i].events & EPOLLIN)))
             {
-                removeChannel(&channel);
+                if (channel.removeChannel() < 0)
+                {
+                    cpptools::log::LOG_ERROR("removeChannel error");
+                }
                 _handler->onClose(channel);
                 continue;
             }
@@ -47,7 +49,10 @@ namespace cpptools::net
             {
                 channel._fd = _handler->onAccept(channel);
                 channel.enableAll();
-                addChannel(&channel);
+                if (channel.addChannel() < 0)
+                {
+                    cpptools::log::LOG_ERROR("addChannel error");
+                }
                 continue;
             }
             if (events[i].events & EPOLLIN) // 是否可读
@@ -60,30 +65,6 @@ namespace cpptools::net
             }
         }
         return n_fds;
-    }
-
-    int PollEpoll::updateChannel(Channel *ch)
-    {
-        struct epoll_event ev{};
-        ev.events = ch->events;
-        ev.data.ptr = ch;
-        return epoll_ctl(this->epoll_fd, EPOLL_CTL_MOD, this->socket_fd, &ev);
-    }
-
-    int PollEpoll::addChannel(Channel *ch)
-    {
-        struct epoll_event ev{};
-        ev.events = ch->events;
-        ev.data.fd = ch->_fd;
-        return epoll_ctl(this->epoll_fd, EPOLL_CTL_ADD, ch->_fd, &ev);
-    }
-
-    int PollEpoll::removeChannel(Channel *ch)
-    {
-        struct epoll_event ev{};
-        ev.events = ch->events;
-        ev.data.fd = ch->_fd;
-        return epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, ch->_fd, &ev);
     }
 
     UniquePtr<PollEvent> createPollEvent(ChannelHandler *handler)

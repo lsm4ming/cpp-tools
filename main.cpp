@@ -197,14 +197,24 @@ void pollTest()
     }
 }
 
+void pong(cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
+{
+    auto t = req.getQuery("name");
+    resp.addHeader("Content-Type", "application/json; charset=utf-8");
+    auto result = cpptools::json::JsonValue();
+    result["code"] = 200;
+    result["message"] = "操作成功";
+    result["data"] = "pong";
+    resp.write(result.toString());
+}
+
 void httpServerTest()
 {
-    cpptools::http::HttpServer server("127.0.0.1", 9999);
+    cpptools::http::HttpServer server("0.0.0.0", 9999);
 
-    server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/category", nullptr);
-    server.addRoute(cpptools::http::HttpMethod::HTTP_POST, "/category", nullptr);
+    server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/ping", pong);
     server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/",
-                    []( cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
+                    [](cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
                     {
                         auto t = req.getQuery("name");
                         resp.addHeader("Content-Type", "text/plain");

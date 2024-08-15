@@ -126,6 +126,7 @@ namespace cpptools::http
 
     void HttpProtocolHandler::onRead(const PollConn &conn)
     {
+        cpptools::log::LOG_INFO("开始处理请求");
         Vector<char> buff;
         int index;
         while (true)

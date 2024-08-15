@@ -2,11 +2,14 @@
 
 #include <fcntl.h>
 #include "cpptools/common/common.h"
+#include "cpptools/log/log.h"
 
 #if defined(OS_MAC)
 #include <sys/event.h>
 #elif defined(OS_LINUX)
+
 #include <sys/epoll.h>
+
 #endif
 
 #include "poll_event.h"
@@ -31,15 +34,15 @@ namespace cpptools::net
     {
     public:
         uint32_t events{};
-        void *data{};
         int _fd{-1};
+        int poll_fd{-1};
 
     public:
         Channel() = default;
 
         ~Channel() = default;
 
-        Channel(int fd, uint32_t events, void *data) : _fd(fd), events(events), data(data)
+        Channel(int fd, uint32_t events, int poll_fd) : _fd(fd), events(events), poll_fd(poll_fd)
         {
         };
 
@@ -56,5 +59,13 @@ namespace cpptools::net
         void enableNoBlocking() const;
 
         [[nodiscard]] int getFd() const;
+
+        [[nodiscard]] int close() const;
+
+        [[nodiscard]] int updateChannel() const;
+
+        [[nodiscard]] int addChannel() const;
+
+        [[nodiscard]] int removeChannel() const;
     };
 }
