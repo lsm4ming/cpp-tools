@@ -43,7 +43,7 @@ namespace cpptools::http
         String _host{"127.0.0.1"};
         uint16 _port{8080};
         String _staticDir;
-        volatile std::atomic_bool running{false};
+        std::atomic_bool running{false};
         HttpRouter router;
 
     private:

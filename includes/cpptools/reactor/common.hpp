@@ -7,6 +7,9 @@
 #include <functional>
 
 #include "codec.hpp"
+#include "cpptools/common/common.h"
+
+using namespace cpptools::common;
 
 namespace cpptools::reactor
 {
@@ -26,12 +29,12 @@ namespace cpptools::reactor
         assert(setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)) != -1);
     }
 
-    int CreateListenSocket(char *ip, int port, bool isReusePort)
+    int CreateListenSocket(const String &host, uint16 port, bool isReusePort)
     {
         sockaddr_in addr{};
         addr.sin_family = AF_INET;
         addr.sin_port = htons(port);
-        addr.sin_addr.s_addr = inet_addr(ip);
+        addr.sin_addr.s_addr = inet_addr(host.c_str());
         int sockFd = socket(AF_INET, SOCK_STREAM, 0);
         if (sockFd < 0)
         {
@@ -59,12 +62,12 @@ namespace cpptools::reactor
         return sockFd;
     }
 
-// 调用本函数之前需要把sockFd设置成非阻塞的
-    void LoopAccept(int sockFd, int maxConn, std::function<void(int clientFd)> clientAcceptCallBack)
+    // 调用本函数之前需要把sockFd设置成非阻塞的
+    void LoopAccept(int sockFd, int maxConn, const std::function<void(int clientFd)>& clientAcceptCallBack)
     {
         while (maxConn--)
         {
-            int clientFd = accept(sockFd, NULL, 0);
+            int clientFd = accept(sockFd, nullptr, nullptr);
             if (clientFd > 0)
             {
                 clientAcceptCallBack(clientFd);

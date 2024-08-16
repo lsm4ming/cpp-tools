@@ -9,9 +9,13 @@
 #include <iostream>
 #include <mutex>
 #include <thread>
+#include <utility>
 
 #include "cpptools/common/system.h"
+#include "cpptools/common/argv.h"
 #include "cpptools/reactor/epollctl.hpp"
+
+using namespace cpptools::common;
 
 namespace cpptools::reactor
 {
@@ -39,16 +43,16 @@ namespace cpptools::reactor
     void addToSubReactor(int &index, int clientFd)
     {
         index++;
-        index %= cpptools::common::System::cpuNumber();
+        index %= (int) System::cpuNumber();
         // 轮询的方式添加到SubReactor线程中
         auto *conn = new Conn(clientFd, EpollFd[index], true);
         AddReadEvent(conn);  // 监听可读事件
     }
 
-    void MainReactor(char *argv[])
+    void MainReactor(std::array<String, 3> argv)
     {
         waitSubReactor();  // 等待所有的SubReactor线程都启动完毕
-        int sockFd = CreateListenSocket(argv[1], atoi(argv[2]), true);
+        int sockFd = CreateListenSocket(argv[0], std::stol(argv[1]), true);
         if (sockFd < 0)
         {
             return;
@@ -61,7 +65,7 @@ namespace cpptools::reactor
             return;
         }
         int index = 0;
-        bool mainMonitorRead = (std::string(argv[3]) == "1");
+        bool mainMonitorRead = (argv[2] == "1");
         Conn conn(sockFd, epollFd, true);
         SetNotBlock(sockFd);
         AddReadEvent(&conn);
@@ -154,5 +158,41 @@ namespace cpptools::reactor
             }
         }
     }
+
+    class ReactorServer
+    {
+    private:
+        uint32_t _cn;
+        String _host;
+        uint16 _port;
+        std::atomic_bool running{false};
+
+    public:
+        explicit ReactorServer(String host, uint16 port, uint32_t cn = System::cpuNumber()) : _host(std::move(host)),
+                                                                                              _port(port), _cn(cn)
+        {};
+
+        void start()
+        {
+            this->running = true;
+            EpollFd = new int[this->_cn];
+            for (int i = 0; i < this->_cn; i++)
+            {
+                std::thread(cpptools::reactor::SubReactor, i).detach();  // 这里需要调用detach，让创建的线程独立运行
+            }
+            int mainReactorCnt = 3;
+            std::array<String, 3> argv = {this->_host, std::to_string(this->_port), "1"};
+            for (int i = 0; i < mainReactorCnt; i++)
+            {
+                std::thread(cpptools::reactor::MainReactor, argv).detach();  // 这里需要调用detach，让创建的线程独立运行
+            }
+            while (this->running) sleep(1);  // 主线程陷入死循环
+        }
+
+        void stop()
+        {
+            this->running = false;
+        }
+    };
 }
 

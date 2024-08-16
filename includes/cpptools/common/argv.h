@@ -10,6 +10,10 @@ namespace cpptools::common
         HashMap<String, void *> _argv;
 
     public:
+        Argv() = default;
+
+        Argv(Argv&&) = default;
+
         Argv &set(const String &name, void *arg)
         {
             _argv[name] = arg;
