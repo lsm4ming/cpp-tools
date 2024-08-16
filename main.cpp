@@ -92,9 +92,12 @@ void jsonTest()
     auto name = jsonValue["name"];
     std::cout << name.getType() << std::endl;
 
+    jsonValue["abc"] = StringView("123");
+
     auto jsonArray = cpptools::json::JsonArray();
     jsonArray.push_back(1);
     jsonArray.push_back("123");
+    jsonArray.push_back(StringView("StringView"));
     std::cout << jsonArray.toString() << std::endl;
 
     auto objectValue = cpptools::json::JsonParse::parse(R"(  {"a": 1, "b": 2.5 , "c":"hello"})");
@@ -309,7 +312,7 @@ int main(int argc, char **argv)
     // ioTest();
     // timeTest();
     // netTest();
-    // jsonTest();
+    jsonTest();
     // httpClientTest();
     // pollTest();
     // configTest();

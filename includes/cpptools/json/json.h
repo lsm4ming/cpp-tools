@@ -67,6 +67,9 @@ namespace cpptools::json
         explicit JsonValue(const SharedPtr <JsonArray> &val) : JsonValue(JsonToken::ArrayValue, val)
         {};
 
+        explicit JsonValue(const StringView &val) : JsonValue(JsonToken::StringValue, String(val))
+        {}
+
         JsonValue(const JsonValue &other) = default;
 
         JsonValue(JsonValue &&other) noexcept: json_type(other.json_type), value(std::move(other.value))
@@ -96,14 +99,18 @@ namespace cpptools::json
             return *this;
         }
 
+        JsonValue &operator=(const StringView &val)
+        {
+            json_type = JsonToken::StringValue;
+            value = String(val);
+            return *this;
+        }
+
         template<class T>
         JsonValue &operator=(const T &val)
         {
-            // 使用static_assert在编译时捕捉不支持的类型
             static_assert(!std::is_pointer<T>::value || std::is_same<T, const char *>::value,
                           "不支持将指针类型分配给JsonValue");
-            value = static_cast<const JsonVariant>(val);
-
             if constexpr (std::is_same<T, bool>::value)
             {
                 json_type = JsonToken::BoolValue;
@@ -132,6 +139,7 @@ namespace cpptools::json
             {
                 json_type = JsonToken::NullValue;
             }
+            value = static_cast<const JsonVariant>(val);
             return *this;
         }
 

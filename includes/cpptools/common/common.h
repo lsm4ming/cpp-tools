@@ -27,6 +27,8 @@ namespace cpptools::common
 
     using String = std::string;
 
+    using StringView = std::string_view;
+
     using StringList = std::vector<String>;
 
     template<typename T>

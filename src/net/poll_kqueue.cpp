@@ -63,27 +63,6 @@ namespace cpptools::net
         return n_fds;
     }
 
-//    int PollKqueue::updateChannel(Channel *ch)
-//    {
-//        struct kevent ev{};
-//        EV_SET(&ev, ch->_fd, ch->events, EV_ADD | EV_CLEAR, 0, 0, nullptr);
-//        return kevent(this->kqueue_fd, &ev, 1, nullptr, 0, nullptr);
-//    }
-
-//    int PollKqueue::addChannel(Channel *ch)
-//    {
-//        struct kevent ev{};
-//        EV_SET(&ev, ch->_fd, ch->events, EV_ADD | EV_CLEAR, 0, 0, nullptr);
-//        return kevent(this->kqueue_fd, &ev, 1, nullptr, 0, nullptr);
-//    }
-
-//    int PollKqueue::removeChannel(Channel *ch)
-//    {
-//        struct kevent ev{};
-//        EV_SET(&ev, ch->_fd, ch->events, EV_DELETE, 0, 0, nullptr);
-//        return kevent(this->kqueue_fd, &ev, 1, nullptr, 0, nullptr);
-//    }
-
     UniquePtr<PollEvent> createPollEvent(ChannelHandler *handler)
     {
         return std::make_unique<PollKqueue>(handler);
