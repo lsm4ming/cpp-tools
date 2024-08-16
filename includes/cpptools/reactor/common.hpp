@@ -2,7 +2,9 @@
 
 #include <cassert>
 #include <fcntl.h>
+#if defined(OS_LINUX)
 #include <sys/sysinfo.h>
+#endif
 
 #include <functional>
 

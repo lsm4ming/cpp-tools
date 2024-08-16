@@ -5,6 +5,9 @@
 #include "common.h"
 #if defined(OS_LINUX)
 #include <sys/sysinfo.h>
+#elif defined(OS_MAC)
+#include <mach/mach.h>
+#include <print>
 #endif
 
 namespace cpptools::common

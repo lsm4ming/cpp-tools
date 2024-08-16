@@ -3,6 +3,7 @@
 #include "cpptools/common/common.h"
 
 #ifdef OS_MAC
+
 #include <sys/event.h>
 #include <unistd.h>
 #include <memory>
@@ -34,12 +35,6 @@ namespace cpptools::net
         void close() override;
 
         int pollWait(int timeout) override;
-
-        int updateChannel(Channel *ch) override;
-
-        int addChannel(Channel *ch) override;
-
-        int removeChannel(Channel *ch) override;
     };
 }
 #endif

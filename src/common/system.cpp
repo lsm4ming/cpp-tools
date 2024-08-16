@@ -40,24 +40,44 @@ namespace cpptools::common
     uint64 System::getTotalMemory(const String &unit)
     {
         uint64 totalMemory{};
+#if defined(OS_LINUX)
         struct sysinfo info{};
         if (sysinfo(&info) == 0)
         {
             totalMemory = info.totalram;
             totalMemory *= info.mem_unit;
         }
+#elif defined(OS_MAC)
+        mach_msg_type_number_t count = HOST_BASIC_INFO_COUNT;
+        host_basic_info_data_t host_info;
+        kern_return_t kr = host_statistics(mach_host_self(), HOST_BASIC_INFO, (host_info_t) &host_info, &count);
+        if (kr == KERN_SUCCESS)
+        {
+            totalMemory = static_cast<uint64_t>(host_info.max_mem);
+        }
+#endif
         return formatWithMemoryUnit(totalMemory, unit);
     }
 
     uint64 System::getAvailableMemory(const String &unit)
     {
         uint64 totalMemory{};
+#if defined(OS_LINUX)
         struct sysinfo info{};
         if (sysinfo(&info) == 0)
         {
             totalMemory = info.freeram;
             totalMemory *= info.mem_unit;
         }
+#elif defined(OS_MAC)
+        mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
+        vm_statistics64_data_t vm_info;
+        kern_return_t kr = host_statistics(mach_host_self(), HOST_VM_INFO64, (host_info_t) &vm_info, &count);
+        if (kr == KERN_SUCCESS)
+        {
+            totalMemory = static_cast<uint64_t>(vm_info.free_count) * sysconf(_SC_PAGESIZE);
+        }
+#endif
         return formatWithMemoryUnit(totalMemory, unit);
     }
 

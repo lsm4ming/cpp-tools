@@ -8,9 +8,7 @@
 #if defined(OS_MAC)
 #include <sys/event.h>
 #elif defined(OS_LINUX)
-
 #include <sys/epoll.h>
-
 #endif
 
 #include "poll_event.h"

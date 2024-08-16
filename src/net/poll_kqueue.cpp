@@ -28,52 +28,61 @@ namespace cpptools::net
         int n_fds = kevent(this->kqueue_fd, nullptr, 0, events, MaxEvents, timeout == -1 ? nullptr : &ts);
         for (int i = 0; i < n_fds; i++)
         {
-            Channel channel((int) events[i].ident, events[i].filter, events[i].udata);
+            auto channel = new Channel((int) events[i].ident, events[i].filter, this->kqueue_fd);
             if (events[i].flags & EV_EOF || events[i].flags & EV_ERROR)
             {
-                removeChannel(&channel);
-                _handler->onClose(channel);
+                cpptools::log::LOG_DEBUG("客户端连接关闭,fd=%d", channel->_fd);
+                if (channel->close() < 0)
+                {
+                    cpptools::log::LOG_ERROR("Failed to remove channel");
+                }
+                _handler->onClose(*channel);
+                delete channel;
                 continue;
             }
             if (events[i].ident == this->socket_fd)  // New connection
             {
-                channel._fd = _handler->onAccept(channel);
-                channel.enableAll();
-                addChannel(&channel);
+                channel->_fd = _handler->onAccept(*channel);
+                channel->enableAll();
+                if (channel->addChannel() < 0)
+                {
+                    cpptools::log::LOG_ERROR("addChannel error");
+                }
                 continue;
             }
             if (events[i].filter == EVFILT_READ) // Readable
             {
-                _handler->onRead(channel);
+                _handler->onRead(*channel);
+                channel->enableWriting();
             }
             if (events[i].filter == EVFILT_WRITE) // Writable
             {
-                _handler->onWrite(channel);
+                _handler->onWrite(*channel);
             }
         }
         return n_fds;
     }
 
-    int PollKqueue::updateChannel(Channel *ch)
-    {
-        struct kevent ev{};
-        EV_SET(&ev, ch->_fd, ch->events, EV_ADD | EV_CLEAR, 0, 0, nullptr);
-        return kevent(this->kqueue_fd, &ev, 1, nullptr, 0, nullptr);
-    }
+//    int PollKqueue::updateChannel(Channel *ch)
+//    {
+//        struct kevent ev{};
+//        EV_SET(&ev, ch->_fd, ch->events, EV_ADD | EV_CLEAR, 0, 0, nullptr);
+//        return kevent(this->kqueue_fd, &ev, 1, nullptr, 0, nullptr);
+//    }
 
-    int PollKqueue::addChannel(Channel *ch)
-    {
-        struct kevent ev{};
-        EV_SET(&ev, ch->_fd, ch->events, EV_ADD | EV_CLEAR, 0, 0, nullptr);
-        return kevent(this->kqueue_fd, &ev, 1, nullptr, 0, nullptr);
-    }
+//    int PollKqueue::addChannel(Channel *ch)
+//    {
+//        struct kevent ev{};
+//        EV_SET(&ev, ch->_fd, ch->events, EV_ADD | EV_CLEAR, 0, 0, nullptr);
+//        return kevent(this->kqueue_fd, &ev, 1, nullptr, 0, nullptr);
+//    }
 
-    int PollKqueue::removeChannel(Channel *ch)
-    {
-        struct kevent ev{};
-        EV_SET(&ev, ch->_fd, ch->events, EV_DELETE, 0, 0, nullptr);
-        return kevent(this->kqueue_fd, &ev, 1, nullptr, 0, nullptr);
-    }
+//    int PollKqueue::removeChannel(Channel *ch)
+//    {
+//        struct kevent ev{};
+//        EV_SET(&ev, ch->_fd, ch->events, EV_DELETE, 0, 0, nullptr);
+//        return kevent(this->kqueue_fd, &ev, 1, nullptr, 0, nullptr);
+//    }
 
     UniquePtr<PollEvent> createPollEvent(ChannelHandler *handler)
     {
