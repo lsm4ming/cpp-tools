@@ -44,9 +44,9 @@ namespace cpptools::net
             return this->clientAddress;
         }
 
-        size_t read(char *buf, size_t len) const;
+        ssize_t read(char *buf, size_t len) const;
 
-        size_t write(const void *buf, size_t len) const;
+        ssize_t write(const void *buf, size_t len) const;
 
         int close() const;
 

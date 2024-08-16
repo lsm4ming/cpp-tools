@@ -132,12 +132,16 @@ namespace cpptools::http
         while (true)
         {
             char data[BUFFER_SIZE];
-            size_t len = conn.read(data, BUFFER_SIZE);
+            ssize_t len = conn.read(data, BUFFER_SIZE);
             buff.insert(buff.end(), data, data + len);
             // 是否存在\r\n\r\n
             if (buff.size() >= 4 && (index = cpptools::utils::Strings::indexOf(String(data), HEADER_END)) != -1)
             {
                 break;
+            }
+            if (len < 0 && errno == EAGAIN)
+            {
+                continue;
             }
             if (len < BUFFER_SIZE)
             {

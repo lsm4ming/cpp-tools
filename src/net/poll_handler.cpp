@@ -62,12 +62,12 @@ namespace cpptools::net
         this->customHandler = &handler;
     }
 
-    size_t PollConn::read(char *buf, size_t len) const
+    ssize_t PollConn::read(char *buf, size_t len) const
     {
         return ::read(this->_fd, buf, len);
     }
 
-    size_t PollConn::write(const void *buf, size_t len) const
+    ssize_t PollConn::write(const void *buf, size_t len) const
     {
         return ::write(this->_fd, buf, len);
     }

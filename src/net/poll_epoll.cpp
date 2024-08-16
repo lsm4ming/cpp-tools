@@ -38,26 +38,26 @@ namespace cpptools::net
         }
         for (int i = 0; i < n_fds; i++)
         {
-            Channel channel(events[i].data.fd, events[i].events, this->epoll_fd);
+            auto channel = new Channel(events[i].data.fd, events[i].events, this->epoll_fd);
             cpptools::log::LOG_DEBUG("触发事件 events[i].data.fd=%d", events[i].data.fd);
             // 连接退出
             if ((events[i].events & (EPOLLERR | EPOLLHUP)))
             {
                 cpptools::log::LOG_DEBUG("客户端连接关闭,fd=%d", events[i].data.fd);
-                if (channel.removeChannel() < 0)
+                if (channel->close() < 0)
                 {
                     cpptools::log::LOG_ERROR("Failed to remove channel");
                 }
-                // 关闭fd
-                ::close(events[i].data.fd);
-                _handler->onClose(channel);
+                _handler->onClose(*channel);
+                delete channel;
                 continue;
             }
             if (events[i].data.fd == this->socket_fd)  // 连接加入
             {
-                channel._fd = _handler->onAccept(channel);
-                channel.enableAll();
-                if (channel.addChannel() < 0)
+                channel->_fd = _handler->onAccept(*channel);
+                channel->enableReading();
+                channel->enableEt();
+                if (channel->addChannel() < 0)
                 {
                     cpptools::log::LOG_ERROR("addChannel error");
                 }
@@ -65,11 +65,12 @@ namespace cpptools::net
             }
             if (events[i].events & EPOLLIN) // 是否可读
             {
-                _handler->onRead(channel);
+                _handler->onRead(*channel);
+                channel->enableWriting();
             }
             if (events[i].events & EPOLLOUT) // 是否可写
             {
-                _handler->onWrite(channel);
+                _handler->onWrite(*channel);
             }
         }
         return n_fds;

@@ -15,6 +15,7 @@
 #include "cpptools/common/config.h"
 #include "cpptools/utils/proc.h"
 #include "cpptools/utils/network.h"
+#include "cpptools/common/system.h"
 #include "cpptools/concurrency/coroutine.h"
 
 void ioTest()
@@ -304,6 +305,7 @@ void configTest()
 
 int main(int argc, char **argv)
 {
+    std::cout << cpptools::common::System::cpuNumber() << std::endl;
     // ioTest();
     // timeTest();
     // netTest();

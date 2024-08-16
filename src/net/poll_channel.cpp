@@ -50,12 +50,12 @@ namespace cpptools::net
 
     int Channel::close() const
     {
-        if (::close(this->_fd) < 0)
+        cpptools::log::LOG_DEBUG("服务端主动退出,fd=%d", this->_fd);
+        if (this->removeChannel() < 0)
         {
             return -1;
         }
-        cpptools::log::LOG_DEBUG("服务端主动退出,fd=%d", this->_fd);
-        return this->removeChannel();
+        return ::close(this->_fd);
     }
 
     int Channel::updateChannel() const
