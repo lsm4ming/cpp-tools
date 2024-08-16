@@ -10,9 +10,9 @@ namespace cpptools::net
     int HandlerWrapper::onAccept(const Channel &channel)
     {
         struct sockaddr_in client_addr{};
-        socklen_t client;
+        socklen_t client{};
         int client_fd = accept(channel.getFd(), (struct sockaddr *) &client_addr, &client);
-        if (client_fd == -1)
+        if (client_fd == -1 && errno != EINTR)
         {
             perror("accept error");
             throw std::runtime_error("accept error");

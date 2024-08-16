@@ -203,6 +203,7 @@ void pollTest()
 
 void pong(cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
 {
+    cpptools::log::LOG_INFO("处理一次请求");
     auto t = req.getQuery("name");
     resp.addHeader("Content-Type", "application/json; charset=utf-8");
     auto result = cpptools::json::JsonValue();
@@ -214,7 +215,7 @@ void pong(cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp
 
 void httpServerTest()
 {
-    cpptools::log::LOG_LEVEL(cpptools::log::DEBUG);
+    // cpptools::log::LOG_LEVEL(cpptools::log::DEBUG);
     cpptools::http::HttpServer server("0.0.0.0", 9999);
 
     server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/ping", pong);

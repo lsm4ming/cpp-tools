@@ -31,6 +31,11 @@ namespace cpptools::net
     {
         epoll_event events[MaxEvents];
         int n_fds = epoll_wait(this->epoll_fd, events, MaxEvents, timeout);
+        if (n_fds < 0 && EINTR != errno) // 处理 epoll_wait 错误
+        {
+            cpptools::log::LOG_ERROR("epoll_wait error: %s", strerror(errno));
+            return -1;
+        }
         for (int i = 0; i < n_fds; i++)
         {
             Channel channel(events[i].data.fd, events[i].events, this->epoll_fd);

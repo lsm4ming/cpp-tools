@@ -35,7 +35,17 @@ namespace cpptools::net
 
     void Channel::enableNoBlocking() const
     {
-        fcntl(this->_fd, F_SETFL, O_NONBLOCK);
+        int flags = fcntl(this->_fd, F_GETFL, 0);
+        if (flags == -1)
+        {
+            std::cerr << "Failed to get file descriptor flags: " << std::strerror(errno) << std::endl;
+            return;
+        }
+
+        if (fcntl(this->_fd, F_SETFL, flags | O_NONBLOCK) == -1)
+        {
+            std::cerr << "Failed to set file descriptor to non-blocking: " << std::strerror(errno) << std::endl;
+        }
     }
 
     int Channel::close() const
@@ -72,6 +82,12 @@ namespace cpptools::net
         ev.events = this->events;
         ev.data.fd = this->_fd;
         return epoll_ctl(this->poll_fd, EPOLL_CTL_DEL, this->_fd, &ev);
+    }
+
+    int Channel::write(const String &data)
+    {
+        this->pendingData.write(data.data(), (long) data.length());
+        return (int) data.length();
     }
 }
 

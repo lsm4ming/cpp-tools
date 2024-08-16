@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fcntl.h>
+#include <cstring>
 #include "cpptools/common/common.h"
 #include "cpptools/log/log.h"
 
@@ -36,6 +37,7 @@ namespace cpptools::net
         uint32_t events{};
         int _fd{-1};
         int poll_fd{-1};
+        std::stringstream pendingData;
 
     public:
         Channel() = default;
@@ -67,5 +69,7 @@ namespace cpptools::net
         [[nodiscard]] int addChannel() const;
 
         [[nodiscard]] int removeChannel() const;
+
+        int write(const String &data);
     };
 }

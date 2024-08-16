@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include "cpptools/common/common.h"
 #include "cpptools/log/log.h"
 #include "poll_event.h"
