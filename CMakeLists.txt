@@ -27,4 +27,6 @@ include_directories(includes)
 
 add_executable(cpptools_exec main.cpp ${CPP_SOURCES})
 
-add_executable(reactor reactor.cpp src/common/system.cpp)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    add_executable(reactor reactor.cpp src/common/system.cpp)
+endif ()
