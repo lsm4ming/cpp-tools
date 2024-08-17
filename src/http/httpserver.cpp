@@ -71,6 +71,10 @@ namespace cpptools::http
         {
             response.setStatus(HttpStatus::HTTP_NOT_FOUND);
             return;
+        } else if (node == nullptr)
+        {
+            response.setStatus(HttpStatus::HTTP_NOT_FOUND);
+            return;
         }
         request.setParams(params);
         this->router.getHandler(method, node->getPattern())(request, response);
