@@ -73,7 +73,7 @@ namespace cpptools::http
             return;
         }
         request.setParams(params);
-        this->router.getHandler(method, request.path)(request, response);
+        this->router.getHandler(method, node->getPattern())(request, response);
     }
 
     String eductionContentType(const String &path)

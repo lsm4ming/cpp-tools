@@ -220,7 +220,7 @@ void pong(cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp
 void httpServerTest()
 {
     // cpptools::log::LOG_LEVEL(cpptools::log::DEBUG);
-    cpptools::http::HttpServer server("0.0.0.0", 9999);
+    cpptools::http::HttpServer server("0.0.0.0", 10040);
 
     server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/ping", pong);
     server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/",
@@ -229,7 +229,7 @@ void httpServerTest()
                         auto t = req.getQuery("name");
                         resp.addHeader("Content-Type", "text/plain");
                         auto result = "hello: " + t;
-                        resp.write(result.data(), result.length());
+                        resp.write(result.data(), result.length() + 1);
                     });
     server.addRoute(cpptools::http::HttpMethod::HTTP_POST, "/",
                     [](const cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
@@ -237,7 +237,7 @@ void httpServerTest()
                         auto t = req.getQuery("name");
                         resp.addHeader("Content-Type", "text/plain");
                         auto result = "hello: " + t;
-                        resp.write(result.data(), result.length());
+                        resp.write(result.data(), result.length() + 1);
                     });
     server.start();
 }
