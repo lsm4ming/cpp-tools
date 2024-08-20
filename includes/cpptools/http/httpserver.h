@@ -10,6 +10,7 @@
 #include "http_router.h"
 #include "define.h"
 #include "request_parse.h"
+#include "cpptools/net/poll_handler.h"
 
 using namespace cpptools::common;
 using namespace cpptools::net;
@@ -28,7 +29,7 @@ namespace cpptools::http
 
         void onAccept(const PollConn &conn) override;
 
-        void onRead(const PollConn &conn) override;
+        ssize_t onRead(const PollConn &conn) override;
 
         void onWrite(const PollConn &conn) override;
 

@@ -9,14 +9,12 @@ using namespace cpptools::common;
 
 namespace cpptools::net
 {
-    class Channel;
-
     class ChannelHandler
     {
     public:
-        virtual int onAccept(const Channel &channel) = 0;
+        virtual int onAccept(Channel &channel) = 0;
 
-        virtual void onRead(const Channel &channel) = 0;
+        virtual ssize_t onRead(const Channel &channel) = 0;
 
         virtual void onWrite(const Channel &channel) = 0;
 
@@ -29,12 +27,13 @@ namespace cpptools::net
     {
     private:
         const InetAddress clientAddress;
-        int _fd;
         const Channel &channel;
+        mutable std::ostringstream send_buf{};
+        mutable size_t send_len{0};
 
     public:
-        PollConn(int fd, const InetAddress &addr, const Channel &channel) : _fd(fd), clientAddress(addr),
-                                                                            channel(channel)
+        PollConn(InetAddress &addr, const Channel &channel) : clientAddress(addr),
+                                                              channel(channel)
         {};
 
         ~PollConn() = default;
@@ -46,15 +45,19 @@ namespace cpptools::net
 
         ssize_t read(char *buf, size_t len) const;
 
-        ssize_t write(const void *buf, size_t len) const;
+        size_t write(const void *buf, size_t len) const;
 
-        int close() const;
+        ssize_t writeConn() const;
+
+        void close() const;
 
         void flush() const;
 
+        bool finished() const;
+
         [[nodiscard]] int getFd() const
         {
-            return this->_fd;
+            return this->channel._fd;
         }
     };
 
@@ -63,17 +66,19 @@ namespace cpptools::net
     public:
         virtual void onAccept(const PollConn &conn) = 0;
 
-        virtual void onRead(const PollConn &conn) = 0;
+        virtual ssize_t onRead(const PollConn &conn) = 0;
 
         virtual void onWrite(const PollConn &conn) = 0;
 
         virtual void onClose(const PollConn &conn) = 0;
 
-        int onAccept(const Channel &channel) override
+        int onAccept(Channel &channel) override
         { return 0; };
 
-        void onRead(const Channel &channel) override
-        {};
+        ssize_t onRead(const Channel &channel) override
+        {
+            return 0;
+        };
 
         void onWrite(const Channel &channel) override
         {};
@@ -88,7 +93,6 @@ namespace cpptools::net
     {
     private:
         ConnectHandler *customHandler;
-
         HashMap<int, SharedPtr<PollConn>> connMap;
 
     public:
@@ -98,9 +102,9 @@ namespace cpptools::net
 
         explicit HandlerWrapper(ConnectHandler &&handler);
 
-        int onAccept(const Channel &channel) override;
+        int onAccept(Channel &channel) override;
 
-        void onRead(const Channel &channel) override;
+        ssize_t onRead(const Channel &channel) override;
 
         void onWrite(const Channel &channel) override;
 
@@ -112,4 +116,8 @@ namespace cpptools::net
             return std::make_unique<HandlerWrapper>(std::forward<T>(handler));
         }
     };
+
+    extern UniquePtr<PollEvent> createPollEvent(ChannelHandler *handler);
+
+    extern UniquePtr<PollEvent> createPollEvent(UniquePtr<ChannelHandler> handler);
 }

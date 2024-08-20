@@ -1,16 +1,11 @@
 #pragma once
 
 #include "cpptools/common/common.h"
-#include "poll_handler.h"
 
 using namespace cpptools::common;
 
 namespace cpptools::net
 {
-    class Channel;
-
-    class ChannelHandler;
-
     constexpr const size_t MaxEvents = 1024;
 
     class PollEvent
@@ -38,8 +33,4 @@ namespace cpptools::net
          */
         virtual int pollWait(int timeout) = 0;
     };
-
-    extern UniquePtr<PollEvent> createPollEvent(ChannelHandler *handler);
-
-    extern UniquePtr<PollEvent> createPollEvent(UniquePtr<ChannelHandler> handler);
 }

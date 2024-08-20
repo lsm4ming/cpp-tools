@@ -47,7 +47,7 @@ namespace cpptools::http
 
         while (this->running)
         {
-            poll->pollWait(1000);
+            poll->pollWait(-1);
         }
     }
 
@@ -128,30 +128,32 @@ namespace cpptools::http
         conn.close();
     }
 
-    void HttpProtocolHandler::onRead(const PollConn &conn)
+    ssize_t HttpProtocolHandler::onRead(const PollConn &conn)
     {
         cpptools::log::LOG_DEBUG("开始处理请求，fd=%d", conn.getFd());
         Vector<char> buff;
         int index;
+        ssize_t bytes_read = 0;
         while (true)
         {
             char data[BUFFER_SIZE];
             ssize_t len = conn.read(data, BUFFER_SIZE);
+            if (len <= 0)
+            {
+                return len;
+            }
+            bytes_read += len;
             buff.insert(buff.end(), data, data + len);
             // 是否存在\r\n\r\n
             if (buff.size() >= 4 && (index = cpptools::utils::Strings::indexOf(String(data), HEADER_END)) != -1)
             {
                 break;
             }
-            if (len < 0 && errno == EAGAIN)
-            {
-                continue;
-            }
             if (len < BUFFER_SIZE)
             {
                 // 已经读完了都不存在，说明不是合法的HTTP请求
                 badRequest(conn);
-                return;
+                return 0;
             }
         }
         // 从index开始，后面都是body
@@ -164,7 +166,7 @@ namespace cpptools::http
         if (parse.parse(request) == -1)
         {
             badRequest(conn);
-            return;
+            return 0;
         }
         Function<size_t(char *, size_t)> writerFun = [ObjectPtr = &conn](auto &&PH1, auto &&PH2)
         { return ObjectPtr->write(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); };
@@ -172,13 +174,28 @@ namespace cpptools::http
             HttpResponseWriter responseWriter(writerFun);
             this->pServer->dispatch(conn.getFd(), request, responseWriter);
         }
-        conn.flush();
-        conn.close();
+        return bytes_read;
     }
 
     void HttpProtocolHandler::onWrite(const PollConn &conn)
     {
-        // nop
+        do
+        {
+            if (conn.finished())
+            {
+                // conn.flush();
+                conn.close();
+                return;
+            }
+            ssize_t ret = conn.writeConn();
+            if (ret < 0)
+            {
+                if (EINTR == errno) continue;
+                if (EAGAIN == errno && EWOULDBLOCK == errno) return;
+                cpptools::log::LOG_ERROR("write failed, fd=%d", conn.getFd());
+                return;
+            }
+        } while (true);
     }
 
     void HttpProtocolHandler::onClose(const PollConn &conn)

@@ -5,9 +5,8 @@
 #include "cpptools/log/log.h"
 #include "poll_event.h"
 #include "poll.h"
-
+#include "poll_handler.h"
 #ifdef OS_LINUX
-
 #include <sys/epoll.h>
 
 namespace cpptools::net
@@ -19,6 +18,7 @@ namespace cpptools::net
         int epoll_fd{-1};
         ChannelHandler *_handler;
         HashMap<int, Channel> channelMap{};
+        HashMap<int, std::string> client_buffers;
 
     public:
         explicit PollEpoll(ChannelHandler *handler);

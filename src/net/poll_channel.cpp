@@ -38,15 +38,15 @@ namespace cpptools::net
         enableNoBlocking(this->_fd);
     }
 
-    int Channel::close() const
+    void Channel::close() const
     {
-        cpptools::log::LOG_INFO("关闭请求,fd=%d", this->_fd);
+        cpptools::log::LOG_DEBUG("关闭请求,fd=%d", this->_fd);
         if (this->removeChannel() < 0)
         {
-            return -1;
+            cpptools::log::LOG_ERROR("Failed to remove channel");
         }
         this->closeCallback(this->_fd);
-        return ::close(this->_fd);
+        ::close(this->_fd);
     }
 
     int Channel::updateChannel() const
@@ -55,7 +55,6 @@ namespace cpptools::net
         struct epoll_event ev{};
         ev.events = this->events;
         ev.data.fd = this->_fd;
-        ev.data.ptr = (void *) this;
         return epoll_ctl(this->poll_fd, EPOLL_CTL_MOD, this->_fd, &ev);
 #elif defined(OS_MAC)
         struct kevent ev[2];

@@ -31,6 +31,4 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     add_executable(reactor reactor.cpp src/common/system.cpp)
 
     add_executable(echo src/tests/echo.cpp)
-
-    add_executable(echo_v2 src/tests/echo_v2.cpp)
 endif ()

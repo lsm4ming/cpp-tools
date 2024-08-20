@@ -4,15 +4,11 @@
 #include <cstring>
 #include "cpptools/common/common.h"
 #include "cpptools/log/log.h"
-
 #if defined(OS_MAC)
 #include <sys/event.h>
 #elif defined(OS_LINUX)
-
 #include <sys/epoll.h>
-
 #endif
-
 #include "poll_event.h"
 
 using namespace cpptools::common;
@@ -44,7 +40,7 @@ namespace cpptools::net
 
         ~Channel() = default;
 
-        Channel(int fd) : _fd(fd)
+        explicit Channel(int fd) : _fd(fd)
         {}
 
         Channel(int fd, uint32_t events, int poll_fd) : _fd(fd), events(events), poll_fd(poll_fd)
@@ -67,7 +63,7 @@ namespace cpptools::net
 
         [[nodiscard]] int getFd() const;
 
-        [[nodiscard]] int close() const;
+        void close() const;
 
         [[nodiscard]] int updateChannel() const;
 

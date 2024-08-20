@@ -134,8 +134,9 @@ public:
         connSet.insert(&conn);
     }
 
-    void onRead(const cpptools::net::PollConn &conn) override
+    ssize_t onRead(const cpptools::net::PollConn &conn) override
     {
+        ssize_t result{};
         // 读取所有的内容
         while (true)
         {
@@ -147,6 +148,7 @@ public:
                 this->onClose(conn);
                 break;
             }
+            result += n;
             buff[n] = '\0';
             std::cout << buff << std::endl;
             for (auto c: connSet)
@@ -158,6 +160,7 @@ public:
                 break;
             }
         }
+        return result;
     }
 
     void onWrite(const cpptools::net::PollConn &conn) override
@@ -201,13 +204,13 @@ void pollTest()
 
     while (running)
     {
-        poll->pollWait(1000);
+        poll->pollWait(-1);
     }
 }
 
 void pong(cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
 {
-    cpptools::log::LOG_INFO("处理一次请求");
+    // cpptools::log::LOG_INFO("处理一次请求");
     auto t = req.getQuery("name");
     resp.addHeader("Content-Type", "application/json; charset=utf-8");
     auto result = cpptools::json::JsonValue();

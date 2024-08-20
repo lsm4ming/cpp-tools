@@ -4,9 +4,11 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <unordered_map>
 
 #define MAX_EVENTS 10
 #define PORT 10040
+#define BUFFER_SIZE 1024
 
 // 设置套接字为非阻塞
 int setNonBlocking(int fd)
@@ -76,21 +78,23 @@ int main()
         exit(EXIT_FAILURE);
     }
 
+    std::unordered_map<int, std::string> client_buffers;
+
     while (true)
     {
-        int nfds = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
-        if (nfds == -1)
+        int n_fds = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
+        if (n_fds == -1)
         {
             perror("epoll_wait");
             exit(EXIT_FAILURE);
         }
 
-        for (int i = 0; i < nfds; ++i)
+        for (int i = 0; i < n_fds; ++i)
         {
             if (events[i].data.fd == server_fd)
             {
-                // 处理新的连接
                 int client_fd;
+                // 处理新的连接
                 while ((client_fd = accept(server_fd, (struct sockaddr *) &address, (socklen_t *) &addrlen)) > 0)
                 {
                     if (setNonBlocking(client_fd) < 0)
@@ -99,12 +103,13 @@ int main()
                         continue;
                     }
                     event.data.fd = client_fd;
-                    event.events = EPOLLIN | EPOLLET;
+                    event.events = EPOLLIN | EPOLLET | EPOLLOUT; // 监听读和写事件
                     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event) == -1)
                     {
                         perror("epoll_ctl: client_fd");
                         close(client_fd);
                     }
+                    client_buffers[client_fd] = ""; // 初始化缓冲区
                 }
                 if (client_fd == -1 && (errno != EAGAIN && errno != EWOULDBLOCK))
                 {
@@ -112,30 +117,76 @@ int main()
                 }
             } else
             {
-                // 处理客户端数据
                 int client_fd = events[i].data.fd;
-                char buffer[1024];
-                ssize_t bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+                std::cout << "client_fd=" << client_fd << std::endl;
 
-                if (bytes_read <= 0)
+                if (events[i].events & EPOLLIN)
                 {
-                    if (bytes_read == 0)
+                    // 处理读事件
+                    char buffer[BUFFER_SIZE];
+                    ssize_t bytes_read;
+                    while ((bytes_read = recv(client_fd, buffer, sizeof(buffer) - 1, 0)) > 0)
                     {
-                        std::cout << "Client disconnected" << std::endl;
-                    } else
+                        // 累积数据到缓冲区
+                        client_buffers[client_fd] = "HTTP/1.1 200 OK" + std::string("\r\n") +
+                                                    "Content-Type: application/json; charset=utf-8" +
+                                                    std::string("\r\n") +
+                                                    "Content-Length: 51" + std::string("\r\n\r\n");
+                        client_buffers[client_fd] += R"({"code":200,"data":"pong","message":"操作成功"})";
+                    }
+
+                    if (bytes_read == -1 && errno != EAGAIN && errno != EWOULDBLOCK)
                     {
                         perror("recv");
+                        close(client_fd);
+                        client_buffers.erase(client_fd);
+                    } else if (bytes_read == 0)
+                    {
+                        std::cout << "Client disconnected" << std::endl;
+                        close(client_fd);
+                        client_buffers.erase(client_fd);
+                    } else
+                    {
+                        // 注册写事件以发送数据
+                        event.data.fd = client_fd;
+                        event.events = EPOLLOUT | EPOLLET;
+                        if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, client_fd, &event) == -1)
+                        {
+                            perror("epoll_ctl: EPOLLOUT");
+                            close(client_fd);
+                            client_buffers.erase(client_fd);
+                        }
                     }
-                    close(client_fd);
-                } else
+                }
+
+                if (events[i].events & EPOLLOUT)
                 {
-                    std::string message_ = "HTTP/1.1 200 OK" + std::string("\r\n") +
-                                           "Content-Type: application/json; charset=utf-8" + std::string("\r\n") +
-                                           "Content-Length: 51" + std::string("\r\n\r\n");
-                    message_ += R"({"code":200,"data":"pong","message":"操作成功"})";
-                    send(client_fd, message_.c_str(), message_.length(), 0);
-                    close(client_fd); // 主动关闭连接
-                    std::cout << "响应一次" << std::endl;
+                    // 处理写事件
+                    std::string &buffer = client_buffers[client_fd];
+                    ssize_t bytes_written = send(client_fd, buffer.c_str(), buffer.size(), 0);
+                    if (bytes_written == -1 && errno != EAGAIN && errno != EWOULDBLOCK)
+                    {
+                        perror("send");
+                        close(client_fd);
+                        client_buffers.erase(client_fd);
+                    } else if (bytes_written > 0)
+                    {
+                        buffer.erase(0, bytes_written); // 从缓冲区中移除已发送的数据
+
+                        if (buffer.empty())
+                        {
+                            // 数据发送完毕，注销写事件
+                            event.data.fd = client_fd;
+                            event.events = EPOLLIN | EPOLLET;
+                            if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, client_fd, &event) == -1)
+                            {
+                                perror("epoll_ctl: EPOLLIN");
+                                close(client_fd);
+                                client_buffers.erase(client_fd);
+                            }
+                            // std::cout << "响应一次 fd=" << client_fd << std::endl;
+                        }
+                    }
                 }
             }
         }

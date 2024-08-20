@@ -7,7 +7,7 @@ namespace cpptools::net
         this->customHandler = handler;
     }
 
-    int HandlerWrapper::onAccept(const Channel &channel)
+    int HandlerWrapper::onAccept(Channel &channel)
     {
         struct sockaddr_in client_addr{};
         socklen_t client{};
@@ -16,20 +16,22 @@ namespace cpptools::net
         {
             return client_fd;
         }
+        channel._fd = client_fd;
         InetAddress address(client_addr);
-        auto conn = std::make_shared<PollConn>(client_fd, address, channel);
+        auto conn = std::make_shared<PollConn>(address, channel);
         this->connMap.insert({client_fd, conn});
         this->customHandler->onAccept(*conn);
         return client_fd;
     }
 
-    void HandlerWrapper::onRead(const Channel &channel)
+    ssize_t HandlerWrapper::onRead(const Channel &channel)
     {
         auto iter = connMap.find(channel.getFd());
         if (iter != connMap.end())
         {
-            this->customHandler->onRead(*iter->second);
+            return this->customHandler->onRead(*iter->second);
         }
+        return 0;
     }
 
     void HandlerWrapper::onWrite(const Channel &channel)
@@ -63,21 +65,38 @@ namespace cpptools::net
 
     ssize_t PollConn::read(char *buf, size_t len) const
     {
-        return ::read(this->_fd, buf, len);
+        return ::read(this->channel._fd, buf, len);
     }
 
-    ssize_t PollConn::write(const void *buf, size_t len) const
+    size_t PollConn::write(const void *buf, size_t len) const
     {
-        return ::write(this->_fd, buf, len);
+        this->send_buf.write(static_cast<const char *>(buf), (long) len);
+        return len;
     }
 
-    int PollConn::close() const
+    ssize_t PollConn::writeConn() const
     {
-        return this->channel.close();
+        ssize_t ret = ::write(this->channel._fd, this->send_buf.str().data() + this->send_len,
+                              this->send_buf.str().length() - this->send_len);
+        if (ret > 0)
+        {
+            this->send_len += ret;
+        }
+        return ret;
+    }
+
+    void PollConn::close() const
+    {
+        channel.close();
     }
 
     void PollConn::flush() const
     {
-        ::fsync(this->_fd);
+        ::fsync(this->channel._fd);
+    }
+
+    bool PollConn::finished() const
+    {
+        return this->send_len == this->send_buf.str().length();
     }
 }
