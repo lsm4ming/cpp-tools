@@ -82,14 +82,14 @@ int main()
 
     while (true)
     {
-        int nfds = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
-        if (nfds == -1)
+        int n_fds = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
+        if (n_fds == -1)
         {
             perror("epoll_wait");
             exit(EXIT_FAILURE);
         }
 
-        for (int i = 0; i < nfds; ++i)
+        for (int i = 0; i < n_fds; ++i)
         {
             if (events[i].data.fd == server_fd)
             {

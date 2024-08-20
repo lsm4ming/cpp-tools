@@ -12,10 +12,9 @@ namespace cpptools::net
         struct sockaddr_in client_addr{};
         socklen_t client{};
         int client_fd = accept(channel.getFd(), (struct sockaddr *) &client_addr, &client);
-        if (client_fd == -1 && errno != EINTR)
+        if (client_fd < 0)
         {
-            perror("accept error");
-            throw std::runtime_error("accept error");
+            return client_fd;
         }
         InetAddress address(client_addr);
         auto conn = std::make_shared<PollConn>(client_fd, address, channel);

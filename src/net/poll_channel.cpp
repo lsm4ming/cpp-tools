@@ -118,12 +118,6 @@ namespace cpptools::net
 #endif
     }
 
-    int Channel::write(const String &data)
-    {
-        this->pendingData.write(data.data(), (long) data.length());
-        return (int) data.length();
-    }
-
     void Channel::enableNoBlocking(int fd)
     {
         int flags = fcntl(fd, F_GETFL, 0);

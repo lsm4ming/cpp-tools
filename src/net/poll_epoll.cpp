@@ -39,40 +39,45 @@ namespace cpptools::net
         }
         for (int i = 0; i < n_fds; i++)
         {
-            auto channel = new Channel(events[i].data.fd, events[i].events, this->epoll_fd);
             cpptools::log::LOG_DEBUG("触发事件 events[i].data.fd=%d", events[i].data.fd);
+            if (events[i].data.fd == this->socket_fd)  // 连接加入
+            {
+                Channel channel(this->socket_fd, events[i].events, this->epoll_fd);
+                int client_fd;
+                while ((client_fd = _handler->onAccept(channel)) > 0)
+                {
+                    channel._fd = client_fd;
+                    channel.enableReading();
+                    channel.enableEt();
+                    channel.enableNoBlocking();
+                    if (channel.addChannel() < 0)
+                    {
+                        cpptools::log::LOG_ERROR("addChannel error");
+                    }
+                    this->channelMap[client_fd] = channel;
+                }
+                continue;
+            }
+            auto channel = this->channelMap[events[i].data.fd];
             // 连接退出
             if ((events[i].events & (EPOLLERR | EPOLLHUP)))
             {
                 cpptools::log::LOG_DEBUG("客户端连接关闭,fd=%d", events[i].data.fd);
-                if (channel->close() < 0)
+                if (channel.close() < 0)
                 {
                     cpptools::log::LOG_ERROR("Failed to remove channel");
                 }
-                _handler->onClose(*channel);
-                delete channel;
-                continue;
-            }
-            if (events[i].data.fd == this->socket_fd)  // 连接加入
-            {
-                channel->_fd = _handler->onAccept(*channel);
-                channel->enableReading();
-                channel->enableEt();
-                channel->enableNoBlocking();
-                if (channel->addChannel() < 0)
-                {
-                    cpptools::log::LOG_ERROR("addChannel error");
-                }
+                _handler->onClose(channel);
                 continue;
             }
             if (events[i].events & EPOLLIN) // 是否可读
             {
-                _handler->onRead(*channel);
-                channel->enableWriting();
+                _handler->onRead(channel);
+                channel.enableWriting();
             }
             if (events[i].events & EPOLLOUT) // 是否可写
             {
-                _handler->onWrite(*channel);
+                _handler->onWrite(channel);
             }
         }
         return n_fds;

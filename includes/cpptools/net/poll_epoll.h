@@ -18,6 +18,7 @@ namespace cpptools::net
         int socket_fd{-1};
         int epoll_fd{-1};
         ChannelHandler *_handler;
+        HashMap<int, Channel> channelMap{};
 
     public:
         explicit PollEpoll(ChannelHandler *handler);
