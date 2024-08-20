@@ -66,9 +66,9 @@ namespace cpptools::reactor
         }
         int index = 0;
         bool mainMonitorRead = (argv[2] == "1");
-        Conn conn(sockFd, epollFd, true);
+        Conn firstConn(sockFd, epollFd, true);
         SetNotBlock(sockFd);
-        AddReadEvent(&conn);
+        AddReadEvent(&firstConn);
         while (true)
         {
             int num = epoll_wait(epollFd, events, 2048, -1);
@@ -162,27 +162,27 @@ namespace cpptools::reactor
     class ReactorServer
     {
     private:
-        uint32_t _cn;
+        uint32_t _subReactorCnt;
         String _host;
         uint16 _port;
+        uint32_t _mainReactorCnt{};
         std::atomic_bool running{false};
 
     public:
-        explicit ReactorServer(String host, uint16 port, uint32_t cn = System::cpuNumber()) : _host(std::move(host)),
-                                                                                              _port(port), _cn(cn)
+        explicit ReactorServer(String host, uint16 port, uint32_t subReactorCnt = System::cpuNumber(),uint32_t mainReactorCnt = 2) : _host(std::move(host)),
+                                                                                              _port(port), _subReactorCnt(subReactorCnt), _mainReactorCnt(mainReactorCnt)
         {};
 
         void start()
         {
             this->running = true;
-            EpollFd = new int[this->_cn];
-            for (int i = 0; i < this->_cn; i++)
+            EpollFd = new int[this->_subReactorCnt];
+            for (int i = 0; i < this->_subReactorCnt; i++)
             {
                 std::thread(cpptools::reactor::SubReactor, i).detach();  // 这里需要调用detach，让创建的线程独立运行
             }
-            int mainReactorCnt = 3;
             std::array<String, 3> argv = {this->_host, std::to_string(this->_port), "1"};
-            for (int i = 0; i < mainReactorCnt; i++)
+            for (int i = 0; i < _mainReactorCnt; i++)
             {
                 std::thread(cpptools::reactor::MainReactor, argv).detach();  // 这里需要调用detach，让创建的线程独立运行
             }

@@ -5,14 +5,13 @@
 namespace cpptools::reactor
 {
     // http响应数据
-
     class Conn
     {
     public:
         Conn(int fd, int epoll_fd, bool is_multi_io) : fd_(fd), epoll_fd_(epoll_fd), is_multi_io_(is_multi_io)
         {}
 
-        bool Read()
+        [[nodiscard]] bool Read() const
         {
             do
             {
@@ -65,10 +64,10 @@ namespace cpptools::reactor
         bool FinishWrite()
         { return send_len_ == this->message_.length(); }
 
-        int Fd()
+        [[nodiscard]] int Fd() const
         { return fd_; }
 
-        int EpollFd()
+        [[nodiscard]] int EpollFd() const
         { return epoll_fd_; }
 
     private:
