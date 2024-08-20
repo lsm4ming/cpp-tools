@@ -68,6 +68,7 @@ namespace cpptools::net
                     cpptools::log::LOG_ERROR("Failed to remove channel");
                 }
                 _handler->onClose(channel);
+                this->channelMap.extract(events[i].data.fd);
                 continue;
             }
             if (events[i].events & EPOLLIN) // 是否可读
