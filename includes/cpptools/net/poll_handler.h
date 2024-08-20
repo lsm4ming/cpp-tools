@@ -31,11 +31,15 @@ namespace cpptools::net
         const InetAddress clientAddress;
         int _fd;
         const Channel &channel;
+        mutable std::ostringstream send_buf{};
+        mutable size_t send_len{0};
 
     public:
         PollConn(int fd, const InetAddress &addr, const Channel &channel) : _fd(fd), clientAddress(addr),
                                                                             channel(channel)
-        {};
+        {
+            send_buf.clear();
+        };
 
         ~PollConn() = default;
 
@@ -46,11 +50,15 @@ namespace cpptools::net
 
         ssize_t read(char *buf, size_t len) const;
 
-        ssize_t write(const void *buf, size_t len) const;
+        size_t write(const void *buf, size_t len) const;
+
+        ssize_t writeConn() const;
 
         int close() const;
 
         void flush() const;
+
+        bool finished() const;
 
         [[nodiscard]] int getFd() const
         {

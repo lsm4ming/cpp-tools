@@ -67,6 +67,10 @@ namespace cpptools::net
             {
                 _handler->onRead(*channel);
                 channel->enableWriting();
+                if (channel->updateChannel() < 0)
+                {
+                    cpptools::log::LOG_ERROR("updateChannel error");
+                }
             }
             if (events[i].events & EPOLLOUT) // 是否可写
             {

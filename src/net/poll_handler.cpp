@@ -67,18 +67,36 @@ namespace cpptools::net
         return ::read(this->_fd, buf, len);
     }
 
-    ssize_t PollConn::write(const void *buf, size_t len) const
+    size_t PollConn::write(const void *buf, size_t len) const
     {
-        return ::write(this->_fd, buf, len);
+        this->send_buf.write(static_cast<const char *>(buf), (long) len);
+        return len;
+    }
+
+    ssize_t PollConn::writeConn() const
+    {
+        ssize_t ret = ::write(this->_fd, this->send_buf.str().data() + this->send_len,
+                              this->send_buf.str().length() - this->send_len);
+        if (ret > 0)
+        {
+            this->send_len += ret;
+        }
+        return ret;
     }
 
     int PollConn::close() const
     {
+        std::cout << "连接关闭" << std::endl;
         return this->channel.close();
     }
 
     void PollConn::flush() const
     {
         ::fsync(this->_fd);
+    }
+
+    bool PollConn::finished() const
+    {
+        return this->send_len == this->send_buf.str().length();
     }
 }

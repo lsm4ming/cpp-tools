@@ -128,10 +128,10 @@ namespace cpptools::net
 #endif
     }
 
-    int Channel::write(const String &data)
+
+    bool Channel::canWriting() const
     {
-        this->pendingData.write(data.data(), (long) data.length());
-        return (int) data.length();
+        return this->events & EVENT_WRITE;
     }
 }
 

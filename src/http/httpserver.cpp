@@ -172,13 +172,29 @@ namespace cpptools::http
             HttpResponseWriter responseWriter(writerFun);
             this->pServer->dispatch(conn.getFd(), request, responseWriter);
         }
-        conn.flush();
-        conn.close();
     }
 
     void HttpProtocolHandler::onWrite(const PollConn &conn)
     {
-        // nop
+        do
+        {
+            if (conn.finished())
+            {
+                std::cout << "finished" << std::endl;
+                conn.flush();
+                conn.close();
+                return;
+            }
+            ssize_t ret = conn.writeConn();
+            std::cout << "响应数据包大小=" << ret << std::endl;
+            if (ret < 0)
+            {
+                if (EINTR == errno) continue;
+                if (EAGAIN == errno && EWOULDBLOCK == errno) return;
+                cpptools::log::LOG_ERROR("write failed, fd=%d", conn.getFd());
+                return;
+            }
+        } while (true);
     }
 
     void HttpProtocolHandler::onClose(const PollConn &conn)

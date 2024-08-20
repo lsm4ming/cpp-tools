@@ -6,7 +6,9 @@
 #include "cpptools/log/log.h"
 
 #if defined(OS_MAC)
+
 #include <sys/event.h>
+
 #elif defined(OS_LINUX)
 #include <sys/epoll.h>
 #endif
@@ -35,7 +37,6 @@ namespace cpptools::net
         uint32_t events{};
         int _fd{-1};
         int poll_fd{-1};
-        std::stringstream pendingData;
 
     public:
         Channel() = default;
@@ -58,6 +59,8 @@ namespace cpptools::net
 
         void enableNoBlocking() const;
 
+        bool canWriting() const;
+
         [[nodiscard]] int getFd() const;
 
         [[nodiscard]] int close() const;
@@ -67,7 +70,5 @@ namespace cpptools::net
         [[nodiscard]] int addChannel() const;
 
         [[nodiscard]] int removeChannel() const;
-
-        int write(const String &data);
     };
 }
