@@ -40,11 +40,12 @@ namespace cpptools::net
 
     int Channel::close() const
     {
-        cpptools::log::LOG_DEBUG("服务端主动退出,fd=%d", this->_fd);
+        cpptools::log::LOG_INFO("关闭请求,fd=%d", this->_fd);
         if (this->removeChannel() < 0)
         {
             return -1;
         }
+        this->closeCallback(this->_fd);
         return ::close(this->_fd);
     }
 
@@ -131,6 +132,11 @@ namespace cpptools::net
         {
             std::cerr << "Failed to set file descriptor to non-blocking: " << std::strerror(errno) << std::endl;
         }
+    }
+
+    void Channel::setCloseCallback(const std::function<void(int)> &callback)
+    {
+        this->closeCallback = callback;
     }
 }
 

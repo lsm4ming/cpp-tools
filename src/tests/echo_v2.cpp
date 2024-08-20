@@ -182,7 +182,7 @@ int main()
                                 close(client_fd);
                                 client_buffers.erase(client_fd);
                             }
-                            std::cout << "响应一次" << std::endl;
+                            std::cout << "响应一次 fd=" << client_fd << std::endl;
                         }
                     }
                 }

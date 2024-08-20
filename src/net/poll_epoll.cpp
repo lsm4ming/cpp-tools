@@ -50,6 +50,10 @@ namespace cpptools::net
                     channel.enableReading();
                     channel.enableEt();
                     channel.enableNoBlocking();
+                    channel.setCloseCallback([this](int fd)
+                                             {
+                                                 this->channelMap.extract(fd);
+                                             });
                     if (channel.addChannel() < 0)
                     {
                         cpptools::log::LOG_ERROR("addChannel error");
