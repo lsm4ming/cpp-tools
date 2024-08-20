@@ -21,6 +21,8 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     message(STATUS "debug模式构建测试代码...")
     add_executable(cpptools_exec main.cpp ${CPP_SOURCES})
 
+    add_executable(http src/tests/http.cpp ${CPP_SOURCES})
+
     if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         add_executable(reactor reactor.cpp src/common/system.cpp)
 

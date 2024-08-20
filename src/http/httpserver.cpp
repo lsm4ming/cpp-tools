@@ -117,6 +117,12 @@ namespace cpptools::http
         return true;
     }
 
+    void HttpServer::addInterceptor(const HttpInterceptor *interceptor)
+    {
+        this->interceptors.push_back(interceptor);
+        std::sort(interceptors.begin(), interceptors.end(), std::greater<>());
+    }
+
     void HttpProtocolHandler::onAccept(const PollConn &conn)
     {
         // nop
@@ -126,6 +132,57 @@ namespace cpptools::http
     {
         conn.write(BAD_REQUEST, strlen(BAD_REQUEST));
         conn.close();
+    }
+
+    // 匹配函数
+    bool pathMatch(const std::string &pattern, const std::string &path)
+    {
+        auto patternComponents = cpptools::utils::Strings::split(pattern, "/");
+        auto pathComponents = cpptools::utils::Strings::split(path, "/");
+
+        size_t patternIndex = 0;
+        size_t pathIndex = 0;
+
+        while (patternIndex < patternComponents.size() && pathIndex < pathComponents.size())
+        {
+            const std::string &p = patternComponents[patternIndex];
+            const std::string &pa = pathComponents[pathIndex];
+            if (p == "*")
+            {
+                // 如果是 "*", 匹配一个路径组件
+                patternIndex++;
+                pathIndex++;
+            } else if (p == "**")
+            {
+                // 如果是 "**", 匹配零个或多个路径组件
+                patternIndex++;
+                if (patternIndex == patternComponents.size())
+                {
+                    return true; // "**" 是最后的组件，匹配成功
+                }
+                while (pathIndex < pathComponents.size())
+                {
+                    if (pathMatch(patternComponents[patternIndex], pathComponents[pathIndex]))
+                    {
+                        return true;
+                    }
+                    pathIndex++;
+                }
+                return false;
+            } else
+            {
+                // 普通组件匹配
+                if (p == pa)
+                {
+                    patternIndex++;
+                    pathIndex++;
+                } else
+                {
+                    return false;
+                }
+            }
+        }
+        return patternIndex == patternComponents.size() && pathIndex == pathComponents.size();
     }
 
     ssize_t HttpProtocolHandler::onRead(const PollConn &conn)
@@ -172,8 +229,42 @@ namespace cpptools::http
         { return ObjectPtr->write(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2)); };
         {
             HttpResponseWriter responseWriter(writerFun);
+
+            bool next = false;
+            bool abort = false;
+            auto nextFunc = [&next]()
+            {
+                next = true;
+            };
+            auto abortFunc = [&abort]()
+            {
+                abort = true;
+            };
+            InterceptContext context{&request, &responseWriter, nextFunc, abortFunc};
+            // 先执行拦截器
+            for (auto &interceptor: this->pServer->interceptors)
+            {
+                // 正则匹配路径
+                for (auto &path: interceptor->interceptPath())
+                {
+                    if (!pathMatch(path, request.path))
+                    {
+                        continue;
+                    }
+                    interceptor->interceptHandler(context);
+                    break;
+                }
+                if (abort) // 说明不需要往下执行了
+                {
+                    goto DONE;
+                } else if (!next) // 说明不需要执行后面的拦截器
+                {
+                    break;
+                }
+            }
             this->pServer->dispatch(conn.getFd(), request, responseWriter);
         }
+        DONE:
         return bytes_read;
     }
 

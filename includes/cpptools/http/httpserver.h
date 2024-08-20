@@ -3,6 +3,7 @@
 #include <cstring>
 #include <sys/stat.h>
 #include <iostream>
+#include <queue>
 #include "cpptools/log/log.h"
 #include "cpptools/common/common.h"
 #include "cpptools/net/poll_event.h"
@@ -11,12 +12,22 @@
 #include "define.h"
 #include "request_parse.h"
 #include "cpptools/net/poll_handler.h"
+#include "http_interceptor.h"
 
 using namespace cpptools::common;
 using namespace cpptools::net;
 
 namespace cpptools::http
 {
+    // 自定义比较器，按优先级排序
+    struct Compare
+    {
+        bool operator()(const HttpInterceptor *a, const HttpInterceptor *b)
+        {
+            return a->order() < b->order();
+        }
+    };
+
     class HttpServer;
 
     class HttpProtocolHandler : public ConnectHandler
@@ -46,6 +57,7 @@ namespace cpptools::http
         String _staticDir;
         std::atomic_bool running{false};
         HttpRouter router;
+        Vector<const HttpInterceptor *> interceptors{};
 
     private:
         void dispatch(int fd, Request &request, HttpResponseWriter &response);
@@ -79,5 +91,7 @@ namespace cpptools::http
         void stop();
 
         void addRoute(HttpMethod method, const std::string &path, const RouteHandler &handler);
+
+        void addInterceptor(const HttpInterceptor *interceptor);
     };
 }
