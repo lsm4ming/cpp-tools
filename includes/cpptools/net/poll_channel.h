@@ -58,6 +58,8 @@ namespace cpptools::net
 
         void enableNoBlocking() const;
 
+        static void enableNoBlocking(int fd);
+
         [[nodiscard]] int getFd() const;
 
         [[nodiscard]] int close() const;

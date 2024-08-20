@@ -11,13 +11,14 @@ namespace cpptools::net
     int PollEpoll::makeup(int fd)
     {
         this->socket_fd = fd;
-        if ((this->epoll_fd = epoll_create(1)) < 0)
+        if ((this->epoll_fd = epoll_create1(0)) < 0)
         {
             return -1;
         }
         epoll_event event{};
         event.events = EPOLLIN | EPOLLET; // 设置边缘触发
         event.data.fd = this->socket_fd;
+        Channel::enableNoBlocking(event.data.fd);
         return epoll_ctl(this->epoll_fd, EPOLL_CTL_ADD, fd, &event);
     }
 
@@ -57,6 +58,7 @@ namespace cpptools::net
                 channel->_fd = _handler->onAccept(*channel);
                 channel->enableReading();
                 channel->enableEt();
+                channel->enableNoBlocking();
                 if (channel->addChannel() < 0)
                 {
                     cpptools::log::LOG_ERROR("addChannel error");

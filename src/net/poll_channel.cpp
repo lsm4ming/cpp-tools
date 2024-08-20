@@ -35,17 +35,7 @@ namespace cpptools::net
 
     void Channel::enableNoBlocking() const
     {
-        int flags = fcntl(this->_fd, F_GETFL, 0);
-        if (flags == -1)
-        {
-            std::cerr << "Failed to get file descriptor flags: " << std::strerror(errno) << std::endl;
-            return;
-        }
-
-        if (fcntl(this->_fd, F_SETFL, flags | O_NONBLOCK) == -1)
-        {
-            std::cerr << "Failed to set file descriptor to non-blocking: " << std::strerror(errno) << std::endl;
-        }
+        enableNoBlocking(this->_fd);
     }
 
     int Channel::close() const
@@ -132,6 +122,21 @@ namespace cpptools::net
     {
         this->pendingData.write(data.data(), (long) data.length());
         return (int) data.length();
+    }
+
+    void Channel::enableNoBlocking(int fd)
+    {
+        int flags = fcntl(fd, F_GETFL, 0);
+        if (flags == -1)
+        {
+            std::cerr << "Failed to get file descriptor flags: " << std::strerror(errno) << std::endl;
+            return;
+        }
+
+        if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1)
+        {
+            std::cerr << "Failed to set file descriptor to non-blocking: " << std::strerror(errno) << std::endl;
+        }
     }
 }
 
