@@ -210,7 +210,7 @@ void pollTest()
 
 void pong(cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
 {
-    // cpptools::log::LOG_INFO("处理一次请求");
+    cpptools::log::LOG_INFO("处理一次请求");
     auto t = req.getQuery("name");
     resp.addHeader("Content-Type", "application/json; charset=utf-8");
     auto result = cpptools::json::JsonValue();
