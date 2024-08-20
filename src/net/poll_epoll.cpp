@@ -19,7 +19,7 @@ namespace cpptools::net
         event.events = EPOLLIN | EPOLLET; // 设置边缘触发
         event.data.fd = this->socket_fd;
         Channel::enableNoBlocking(event.data.fd);
-        return epoll_ctl(this->epoll_fd, EPOLL_CTL_ADD, fd, &event);
+        return epoll_ctl(this->epoll_fd, EPOLL_CTL_ADD, this->socket_fd, &event);
     }
 
     void PollEpoll::close()
@@ -32,7 +32,7 @@ namespace cpptools::net
     {
         epoll_event events[MaxEvents];
         int n_fds = epoll_wait(this->epoll_fd, events, MaxEvents, timeout);
-        if (n_fds < 0 && EINTR != errno) // 处理 epoll_wait 错误
+        if (n_fds == -1) // 处理 epoll_wait 错误
         {
             cpptools::log::LOG_ERROR("epoll_wait error: %s", strerror(errno));
             return -1;
@@ -46,6 +46,7 @@ namespace cpptools::net
                 int client_fd;
                 while ((client_fd = _handler->onAccept(channel)) > 0)
                 {
+                    std::cout << "client_fd=" << client_fd << std::endl;
                     channel._fd = client_fd;
                     channel.enableReading();
                     channel.enableEt();
