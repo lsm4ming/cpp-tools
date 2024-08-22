@@ -23,6 +23,8 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 
     add_executable(http src/tests/http.cpp ${CPP_SOURCES})
 
+    add_executable(generator src/tests/generator.cpp ${CPP_SOURCES})
+
     if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         add_executable(reactor reactor.cpp src/common/system.cpp)
 
