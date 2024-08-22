@@ -9,6 +9,7 @@
 #include <memory>
 #include "poll_channel.h"
 #include "poll_event.h"
+#include "poll_handler.h"
 
 using namespace cpptools::common;
 
@@ -22,7 +23,8 @@ namespace cpptools::net
     private:
         int socket_fd{-1};
         int kqueue_fd{-1};
-        ChannelHandler *_handler;
+        ChannelHandler *_handler{};
+        HashMap<int, Channel> channelMap{};
 
     public:
         PollKqueue() = default;

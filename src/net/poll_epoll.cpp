@@ -56,6 +56,7 @@ namespace cpptools::net
                     {
                         channel.enableNoBlocking();
                         channel.setCloseCallback(releaseFunc);
+                        channel.events = EPOLLIN | EPOLLET;
                         if (channel.addChannel() < 0)
                         {
                             cpptools::log::LOG_ERROR("addChannel error for fd=%d", client_fd);

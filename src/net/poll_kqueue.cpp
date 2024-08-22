@@ -1,6 +1,6 @@
 #include "cpptools/net/poll_kqueue.h"
 
-#ifdef OS_MAC
+#if defined(OS_MAC)
 namespace cpptools::net
 {
     int PollKqueue::makeup(int fd)
@@ -11,8 +11,9 @@ namespace cpptools::net
             return -1;
         }
         struct kevent event{};
-        EV_SET(&event, this->socket_fd, EVFILT_READ, EV_ADD | EV_CLEAR, 0, 0, nullptr);
-        return kevent(this->kqueue_fd, &event, 1, nullptr, 0, nullptr);
+        EV_SET(&event, this->socket_fd, EVFILT_READ, EV_ADD | EV_ENABLE | EV_CLEAR, 0, 0, nullptr);
+        Channel::enableNoBlocking(this->socket_fd);
+        return kevent(this->kqueue_fd, &event, 1, nullptr, 0, nullptr) < 0 ? -1 : 0;
     }
 
     void PollKqueue::close()
@@ -23,7 +24,7 @@ namespace cpptools::net
 
     int PollKqueue::pollWait(int timeout)
     {
-        struct kevent events[MaxEvents];
+        struct kevent events[MaxEvents]{};
         struct timespec ts{};
         if (timeout == -1)
         {
@@ -34,10 +35,19 @@ namespace cpptools::net
             ts.tv_sec = timeout / 1000;
             ts.tv_nsec = (timeout % 1000) * 1000000;
         }
-        int n_fds = kevent(this->kqueue_fd, nullptr, 0, events, MaxEvents, &ts);
+        int n_fds = kevent(this->kqueue_fd, nullptr, 0, events, MaxEvents, (timeout == -1) ? nullptr : &ts);
+        if (n_fds == -1 && errno != EINTR) // 处理 kevent 错误
+        {
+            cpptools::log::LOG_ERROR("kevent error: %s", strerror(errno));
+            return -1;
+        }
+
         for (int i = 0; i < n_fds; i++)
         {
-            if (events[i].ident == this->socket_fd)
+            int fd = static_cast<int>(events[i].ident);
+            cpptools::log::LOG_DEBUG("触发事件 events[i].ident=%d", fd);
+
+            if (fd == this->socket_fd)
             {
                 auto releaseFunc = [this](int fd)
                 {
@@ -60,44 +70,53 @@ namespace cpptools::net
                         this->channelMap[client_fd] = channel;
                     }
                 } while (client_fd > 0);
-                continue;
-            }
-
-            int client_fd = static_cast<int>(events[i].ident);
-            auto channel = this->channelMap[client_fd];
-
-            if (events[i].flags & EV_EOF || events[i].flags & EV_ERROR)
+            } else
             {
-                cpptools::log::LOG_DEBUG("客户端连接关闭,fd=%d", channel._fd);
-                channel.close();
-                _handler->onClose(channel);
-                continue;
-            }
-            if (events[i].filter == EVFILT_READ) // Readable
-            {
-                ssize_t bytes_read = _handler->onRead(channel);
-                if (bytes_read == -1 && errno != EAGAIN && errno != EWOULDBLOCK)
+                auto it = this->channelMap.find(fd);
+                if (it == this->channelMap.end())
                 {
-                    cpptools::log::LOG_INFO("客户端连接异常关闭,fd=%d,reason=%s", client_fd, strerror(errno));
-                    channel.close();
+                    cpptools::log::LOG_WARNING("Unknown client_fd=%d", fd);
                     continue;
-                } else if (bytes_read == 0)
+                }
+
+                Channel &channel = it->second;
+
+                // 处理错误和关闭事件
+                if (events[i].flags & (EV_EOF | EV_ERROR))
                 {
-                    cpptools::log::LOG_DEBUG("客户端连接关闭,fd=%d", client_fd);
+                    cpptools::log::LOG_DEBUG("客户端连接关闭,fd=%d", fd);
                     channel.close();
                     _handler->onClose(channel);
-                } else
-                {
-                    channel.events = EVFILT_WRITE | EV_CLEAR;
-                    if (channel.updateChannel() < 0)
-                    {
-                        cpptools::log::LOG_ERROR("updateChannel error,reason=%s", strerror(errno));
-                    }
+                    this->channelMap.erase(fd); // 移除通道
+                    continue;
                 }
-            }
-            if (events[i].filter == EVFILT_WRITE) // Writable
-            {
-                _handler->onWrite(channel);
+
+                if (events[i].filter == EVFILT_READ) // Readable
+                {
+                    ssize_t bytes_read = _handler->onRead(channel);
+                    if (bytes_read == -1 && errno != EAGAIN && errno != EWOULDBLOCK)
+                    {
+                        cpptools::log::LOG_INFO("客户端连接异常关闭,fd=%d,reason=%s", fd, strerror(errno));
+                        channel.close();
+                        this->channelMap.erase(fd); // 移除通道
+                    } else if (bytes_read == 0)
+                    {
+                        cpptools::log::LOG_DEBUG("客户端连接关闭,fd=%d", fd);
+                        channel.close();
+                        _handler->onClose(channel);
+                        this->channelMap.erase(fd); // 移除通道
+                    } else
+                    {
+                        channel.events = EVFILT_WRITE | EV_CLEAR;
+                        if (channel.updateChannel() < 0)
+                        {
+                            cpptools::log::LOG_ERROR("updateChannel error,reason=%s", strerror(errno));
+                        }
+                    }
+                } else if (events[i].filter == EVFILT_WRITE) // Writable
+                {
+                    _handler->onWrite(channel);
+                }
             }
         }
         return n_fds;

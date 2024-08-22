@@ -2,6 +2,7 @@
 
 #include <fcntl.h>
 #include <cstring>
+#include <unistd.h>
 #include "cpptools/common/common.h"
 #include "cpptools/log/log.h"
 #if defined(OS_MAC)
