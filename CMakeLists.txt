@@ -17,8 +17,8 @@ add_subdirectory(third_party)
 
 include_directories(includes)
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    message(STATUS "debug模式构建测试代码...")
+if (${TEST} STREQUAL "true")
+    message(STATUS "test模式构建测试代码...")
     add_executable(cpptools_exec main.cpp ${CPP_SOURCES})
 
     add_executable(http src/tests/http.cpp ${CPP_SOURCES})
@@ -30,10 +30,12 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 
         add_executable(echo src/tests/echo.cpp)
     endif ()
+elseif ()
+    message(STATUS "非test模式构建静态库代码...")
+    # 创建静态库目标
+    add_library(cpptools STATIC ${CPP_SOURCES})
+
+    # 设置 cpptools 目标的包含目录
+    target_include_directories(cpptools PUBLIC includes)
 endif ()
 
-# 创建静态库目标
-add_library(cpptools STATIC ${CPP_SOURCES})
-
-# 设置 cpptools 目标的包含目录
-target_include_directories(cpptools PUBLIC includes)
