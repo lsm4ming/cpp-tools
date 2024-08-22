@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include "define.h"
 
 namespace cpptools::http

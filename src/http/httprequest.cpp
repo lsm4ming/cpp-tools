@@ -108,6 +108,11 @@ namespace cpptools::http
 
     String HttpRequest::host_to_ip(const String &hostname)
     {
+        // 判断是否为ip地址
+        if (std::regex_match(hostname, std::regex(R"(^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$)")))
+        {
+            return hostname;
+        }
         auto *he = gethostbyname(hostname.c_str()); // dns
         if (he == nullptr)
         {
@@ -117,12 +122,12 @@ namespace cpptools::http
         return inet_ntoa(*addr_list[0]);
     }
 
-    int HttpRequest::http_create_socket(const String &ip)
+    int HttpRequest::http_create_socket(const String &ip, uint16_t port)
     {
         int fd = socket(AF_INET, SOCK_STREAM, 0);
         struct sockaddr_in sin = {0};
         sin.sin_family = AF_INET;
-        sin.sin_port = htons(80); //
+        sin.sin_port = htons(port); //
         sin.sin_addr.s_addr = inet_addr(ip.c_str());
         if (0 != connect(fd, (struct sockaddr *) &sin, sizeof(struct sockaddr_in)))
         {
@@ -183,11 +188,18 @@ namespace cpptools::http
         // 组装请求url
         this->_rawUrl = assembleUrl();
 
+        // 是否带端口
+        if (this->_domain.find(':') != String::npos)
+        {
+            this->_port = std::stoi(this->_domain.substr(this->_domain.find(':') + 1));
+            this->_domain = this->_domain.substr(0, this->_domain.find(':'));
+        }
+
         // 将domain转为IP地址
         String ip = HttpRequest::host_to_ip(this->_domain);
 
         // 建立TCP连接
-        this->_fd = HttpRequest::http_create_socket(ip);
+        this->_fd = HttpRequest::http_create_socket(ip, this->_port);
 
         OsStringStream stream;
 

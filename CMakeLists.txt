@@ -19,11 +19,13 @@ include_directories(includes)
 
 if (${TEST} STREQUAL "true")
     message(STATUS "test模式构建测试代码...")
-    add_executable(cpptools_exec main.cpp ${CPP_SOURCES})
+    add_executable(main_exec main.cpp ${CPP_SOURCES})
 
-    add_executable(http src/tests/http.cpp ${CPP_SOURCES})
+    add_executable(http_server src/tests/http.cpp ${CPP_SOURCES})
 
     add_executable(generator src/tests/generator.cpp ${CPP_SOURCES})
+
+    add_executable(http_client src/tests/http_client.cpp ${CPP_SOURCES})
 
     if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         add_executable(reactor reactor.cpp src/common/system.cpp)

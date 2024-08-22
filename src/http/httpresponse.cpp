@@ -12,7 +12,7 @@ namespace cpptools::http
         // 读取回复
         OsStringStream responseStream;
         char buffer[BUFFER_SIZE];
-        int bytesReceived;
+        ssize_t bytesReceived;
 
         // 读取响应头
         String headers;
@@ -40,17 +40,21 @@ namespace cpptools::http
         this->_status = headerLine.substr(second_space + 1);
         this->_status.pop_back();
 
+        bool isChunked = false;
         // 解析响应头
         while (std::getline(headersStream, headerLine) && headerLine != "\r")
         {
             size_t index = headerLine.find(':');
             String key = headerLine.substr(0, index);
-            String value = headerLine.substr(index + 1);
+            String value = headerLine.substr(index + 2);
             value.pop_back();
             this->_header[key] = {value};
             if ("Content-Length" == key)
             {
                 this->_length = std::stoi(value);
+            } else if ("Transfer-Encoding" == key)
+            {
+                isChunked = "chunked" == value;
             }
         }
 
@@ -70,6 +74,9 @@ namespace cpptools::http
                 perror("recv");
                 return;
             }
+        } else if (isChunked) // Transfer-Encoding: chunked
+        {
+            // todo read chunk
         }
         this->_body = responseStream.str();
     }
