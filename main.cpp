@@ -210,7 +210,7 @@ void pollTest()
 
 void pong(cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
 {
-    // cpptools::log::LOG_INFO("处理一次请求");
+    cpptools::log::LOG_INFO("处理一次请求");
     auto t = req.getQuery("name");
     resp.addHeader("Content-Type", "application/json; charset=utf-8");
     auto result = cpptools::json::JsonValue();
@@ -220,11 +220,39 @@ void pong(cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp
     resp.write(result.toString());
 }
 
+void push(cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
+{
+    size_t length = req.getContentLength();
+    if (length == 0)
+    {
+        resp.addHeader("Content-Type", "text/plain");
+        resp.setStatus(cpptools::http::HttpStatus::HTTP_BAD_REQUEST);
+        resp.write("content length is 0");
+        return;
+    }
+    char buff[length + 1];
+    auto n = req.readBody(buff, length);
+    if (n != length)
+    {
+        resp.addHeader("Content-Type", "text/plain");
+        resp.setStatus(cpptools::http::HttpStatus::HTTP_BAD_REQUEST);
+        resp.write("read failed");
+        return;
+    }
+    buff[length] = '\0';
+    resp.addHeader("Content-Type", "text/plain");
+
+    std::cout << "收到消息:" << buff << std::endl;
+
+    resp.write("ok");
+}
+
 void httpServerTest()
 {
     // cpptools::log::LOG_LEVEL(cpptools::log::DEBUG);
     cpptools::http::HttpServer server("0.0.0.0", 10040);
 
+    server.addRoute(cpptools::http::HttpMethod::HTTP_POST, "/push", push);
     server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/ping", pong);
     server.addRoute(cpptools::http::HttpMethod::HTTP_GET, "/",
                     [](cpptools::http::Request &req, cpptools::http::HttpResponseWriter &resp)
@@ -255,7 +283,7 @@ void logTest(int argc, char **argv)
     cpptools::log::Logger::getInstance().log(cpptools::log::ERROR, "",
                                              1, "", "hello :%s", (char *) "lsm");
     cpptools::log::LOG_LEVEL(cpptools::log::DEBUG);
-    cpptools::log::LOG_FILENAME("我的日志%Y-%m-%d{level}.log");
+    cpptools::log::LOG_FILENAME("我的日志%Y-%m-%d_{level}.log");
     cpptools::log::LOG_ERROR("hello :%s", "lsm");
 
 

@@ -9,6 +9,7 @@
 #include <thread>
 #include <functional>
 #include <unordered_set>
+#include <tuple>
 
 namespace cpptools::common
 {
@@ -65,4 +66,7 @@ namespace cpptools::common
 
     template<typename T>
     using HashSet = std::unordered_set<T>;
+
+    template<typename ...T>
+    using Tuple = std::tuple<T...>;
 }
