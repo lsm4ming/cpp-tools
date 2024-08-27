@@ -32,6 +32,9 @@ if (${TEST} STREQUAL "true")
 
         add_executable(echo src/tests/echo.cpp)
     endif ()
+    if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        add_executable(echo_mac src/tests/echo_mac.cpp)
+    endif ()
 elseif ()
     message(STATUS "非test模式构建静态库代码...")
     # 创建静态库目标
