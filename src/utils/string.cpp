@@ -91,7 +91,7 @@ namespace cpptools::utils
         return {buf.get(), buf.get() + size - 1};
     }
 
-    String Strings::Join(Vector<String> &list, const String &sep)
+    String Strings::join(Vector<String> &list, const String &sep)
     {
         std::ostringstream oss;
         for (size_t i = 0; i < list.size(); ++i)
@@ -107,28 +107,43 @@ namespace cpptools::utils
 
     String Strings::trim(const String &str)
     {
-        auto result = ltrim(str);
-        return std::move(rtrim(result));
+        return trim(str, " ");
     }
 
     String Strings::ltrim(const String &str)
     {
-        size_t first = str.find_first_not_of(' ');
-        if (first == String::npos)
-        {
-            return str;
-        }
-        return str.substr(first);
+        return ltrim(str, " ");
     }
 
     String Strings::rtrim(const String &str)
     {
-        size_t last = str.find_last_not_of(' ');
+        return rtrim(str, " ");
+    }
+
+    String Strings::ltrim(const String &str, const String &trimChars)
+    {
+        size_t first = str.find_first_not_of(trimChars);
+        if (first == String::npos)
+        {
+            return "";
+        }
+        return str.substr(first);
+    }
+
+    String Strings::rtrim(const String &str, const String &trimChars)
+    {
+        size_t last = str.find_last_not_of(trimChars);
         if (last == String::npos)
         {
-            return str;
+            return "";
         }
         return str.substr(0, last + 1);
+    }
+
+    String Strings::trim(const String &str, const String &trimChars)
+    {
+        auto result = ltrim(str, trimChars);
+        return std::move(rtrim(result, trimChars));
     }
 }
 

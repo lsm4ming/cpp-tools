@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cassert>
 #include "cpptools/common/common.h"
+#include "cpptools/utils/strings.h"
 
 namespace cpptools::tools::generator::protobuf
 {
@@ -26,6 +27,22 @@ namespace cpptools::tools::generator::protobuf
         FAST_RESP = 3,  // Fast-Response
     };
 
+    enum MessageType
+    {
+        MESSAGE_TYPE_INT32 = 1,
+        MESSAGE_TYPE_INT64 = 2,
+        MESSAGE_TYPE_UINT32 = 3,
+        MESSAGE_TYPE_UINT64 = 4,
+        MESSAGE_TYPE_FLOAT = 5,
+        MESSAGE_TYPE_DOUBLE = 6,
+        MESSAGE_TYPE_BOOL = 7,
+        MESSAGE_TYPE_STRING = 8,
+        MESSAGE_TYPE_BYTES = 9,
+        MESSAGE_TYPE_ENUM = 10,
+        MESSAGE_TYPE_MAP = 11,
+        MESSAGE_TYPE_MESSAGE = 12,
+    };
+
     typedef struct RpcInfo
     {
         String rpc_name_; // RPC 名称
@@ -35,6 +52,20 @@ namespace cpptools::tools::generator::protobuf
         String out_file_name_; // 输出文件名
     } RpcInfo;
 
+    typedef struct RpcMessageField
+    {
+        String name_; // 字段名称
+        MessageType type_; // 字段类型
+        uint32 no_; // 字段序号
+        uint8_t flag; // 字段标记 依次为 optional required repeated
+    } RpcMessageField;
+
+    typedef struct RpcMessage
+    {
+        String name_; // 消息名称
+        Vector<RpcMessageField> fields_; // 字段
+    } RpcMessage;
+
     typedef struct ServiceInfo
     {
         String package_name_; // 包名
@@ -42,7 +73,8 @@ namespace cpptools::tools::generator::protobuf
         String cpp_namespace_name_; //
         String handler_file_prefix_; //
         String port_; // 端口
-        std::vector<RpcInfo> rpc_infos_; // RPC 信息
+        Vector<RpcInfo> rpc_infos_; // RPC 信息
+        SortMap<String, RpcMessage> messages_;
     } ServiceInfo;
 
     static bool isSpecial(char c)
@@ -55,8 +87,18 @@ namespace cpptools::tools::generator::protobuf
     public:
         static Vector<Tuple<Token, String>> parse2Token(const String &path);
 
+        static void parse2ServiceInfo(Vector<Tuple<Token, String>> &tokens, ServiceInfo &serviceInfo);
+
     private:
         static void parseLine(const String &line, String &value, Token &token, Vector<Tuple<Token, String>> &tokens);
+
+        static bool isSkip(char c);
+
+        static bool isSkip(String &c);
+
+        static void parseMessageInfo(Vector<Tuple<Token, String>> &tokens, size_t &i, ServiceInfo &info);
+
+        static MessageType convertMessageFieldType(const String &type);
     };
 }
 

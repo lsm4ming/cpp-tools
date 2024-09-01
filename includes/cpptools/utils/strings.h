@@ -76,7 +76,7 @@ namespace cpptools::utils
          * @param sep
          * @return
          */
-        static String Join(Vector <String> &list, const String &sep);
+        static String join(Vector <String> &list, const String &sep);
 
         /**
          * 去除字符串前面空格
@@ -98,5 +98,11 @@ namespace cpptools::utils
          * @return
          */
         static String trim(const String &str);
+
+        static String ltrim(const String &str, const String &trimChars);
+
+        static String rtrim(const String &str, const String &trimChars);
+
+        static String trim(const String &str, const String &trimChars);
     };
 }
