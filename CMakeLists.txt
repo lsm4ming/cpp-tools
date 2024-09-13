@@ -17,7 +17,7 @@ add_subdirectory(third_party)
 
 include_directories(includes)
 
-if (DEFINED TEST AND ${TEST} STREQUAL "true")
+if (DEFINED TEST AND TEST)
     message(STATUS "test模式构建测试代码...")
     add_executable(main_exec main.cpp ${CPP_SOURCES})
 
